@@ -2,17 +2,19 @@
 """
 Scraper danych głosowań Rady Miasta Stołecznego Warszawy.
 
-Źródło: um.warszawa.pl/waw/radawarszawy
-Portal oparty na Liferay — dane renderowane server-side w HTML.
+Źródło: bip.warszawa.pl/web/rada-warszawy
+Portal oparty na Liferay SPA — wymaga JavaScript do renderowania treści.
+Używa Playwright (headless Chromium) do pobierania stron.
 
-Krok 1: Pobierz listę sesji (ze strony sesji)
-Krok 2: Dla każdej sesji — pobierz listę głosowań
+Krok 1: Pobierz listę sesji (paginowana, ~10 per page)
+Krok 2: Dla każdej sesji — pobierz stronę sesji i znajdź głosowania
 Krok 3: Dla każdego głosowania — pobierz wyniki imienne
 Krok 4: Wygeneruj data.json w formacie Radoskop
 
 Użycie:
-    pip install requests beautifulsoup4 lxml
-    python scrape_warszawa.py [--kadencja 2024-2029] [--output docs/data.json]
+    pip install playwright beautifulsoup4 lxml
+    playwright install chromium
+    python scrape_warszawa.py [--kadencja ix] [--output docs/data.json]
 
 UWAGA: Uruchom lokalnie — sandbox Cowork blokuje domeny *.warszawa.pl
 """
@@ -27,315 +29,343 @@ from datetime import datetime
 from pathlib import Path
 
 try:
-    import requests
     from bs4 import BeautifulSoup
 except ImportError:
-    print("Zainstaluj zależności: pip install requests beautifulsoup4 lxml")
+    print("Zainstaluj: pip install beautifulsoup4 lxml")
     sys.exit(1)
 
-BASE = "https://um.warszawa.pl"
-RADA_BASE = f"{BASE}/waw/radawarszawy"
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:
+    print("Zainstaluj: pip install playwright && playwright install chromium")
+    sys.exit(1)
 
-# Znane kadencje
+BIP_BASE = "https://bip.warszawa.pl"
+SESSIONS_URL = f"{BIP_BASE}/web/rada-warszawy/sesje-rady-m.st.-warszawy"
+PORTLET_ID = "web_content_search_portlet_INSTANCE_fkqx"
+PAGE_PARAM = f"_{PORTLET_ID}_cur"
+
 KADENCJE = {
-    "2024-2029": {"label": "Kadencja 2024–2029", "sesje_url": f"{RADA_BASE}/sesje"},
-    # Dodaj starsze kadencje w razie potrzeby
+    "2024-2029": {"label": "Kadencja 2024–2029", "start": "2024-05-07"},
+    "2018-2024": {"label": "Kadencja 2018–2024", "start": "2018-11-22"},
 }
 
-HEADERS = {
-    "User-Agent": "Radoskop/1.0 (https://radoskop.pl; open-source city council monitor)",
-    "Accept": "text/html,application/xhtml+xml",
-    "Accept-Language": "pl,en;q=0.5",
-}
+DELAY = 1.0
 
-DELAY = 1.0  # sekunda między requestami — bądźmy uprzejmi
+# Globalny kontekst Playwright
+_browser = None
+_page = None
 
 
-def fetch(url: str) -> BeautifulSoup:
-    """Pobierz stronę i zwróć BeautifulSoup."""
+def init_browser(headless: bool = True):
+    """Uruchom przeglądarkę Playwright."""
+    global _browser, _page, _pw
+    _pw = sync_playwright().start()
+    _browser = _pw.chromium.launch(headless=headless)
+    ctx = _browser.new_context(
+        user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        locale="pl-PL",
+        accept_downloads=True,
+    )
+    _page = ctx.new_page()
+    # Odrzucaj dialogi i downloady
+    _page.on("download", lambda dl: dl.cancel())
+    _page.on("dialog", lambda d: d.dismiss())
+
+
+def close_browser():
+    """Zamknij przeglądarkę."""
+    global _browser, _pw
+    if _browser:
+        _browser.close()
+    if _pw:
+        _pw.stop()
+
+
+_initialized = False
+
+
+def ensure_bip_session():
+    """Wejdź na stronę główną BIP, żeby zainicjować sesję Liferay SPA."""
+    global _initialized
+    if _initialized:
+        return
+    print("  Inicjalizacja sesji BIP...")
+    _page.goto(f"{BIP_BASE}/web/rada-warszawy", wait_until="networkidle", timeout=30000)
+    time.sleep(2)
+    _initialized = True
+
+
+def fetch(url: str, wait_for: str = "li.search-entry-list-item", save_as: str = None) -> BeautifulSoup:
+    """Pobierz stronę przez Playwright i zwróć BeautifulSoup."""
+    ensure_bip_session()
     time.sleep(DELAY)
     print(f"  GET {url}")
-    resp = requests.get(url, headers=HEADERS, timeout=30)
-    resp.raise_for_status()
-    return BeautifulSoup(resp.text, "lxml")
+
+    # Nawiguj przez JS (jak Liferay SPA) zamiast page.goto
+    try:
+        _page.evaluate(f"window.location.href = '{url}'")
+        _page.wait_for_load_state("networkidle", timeout=30000)
+    except Exception:
+        # Fallback na zwykłe goto
+        try:
+            _page.goto(url, wait_until="networkidle", timeout=30000)
+        except Exception as e:
+            print(f"  Uwaga przy nawigacji: {e}")
+            time.sleep(3)
+
+    # Czekaj na pojawienie się contentu
+    try:
+        _page.wait_for_selector(wait_for, timeout=15000)
+    except Exception:
+        pass
+    html = _page.content()
+    if save_as:
+        Path(save_as).write_text(html, encoding="utf-8")
+        print(f"  Zapisano HTML → {save_as}")
+    return BeautifulSoup(html, "lxml")
 
 
-def discover_session_list_url(kadencja_id: str) -> str:
-    """Znajdź URL listy sesji dla danej kadencji."""
-    # Najpierw sprawdź stronę sesji — mogą być linki do kadencji
-    soup = fetch(f"{RADA_BASE}/sesje")
-
-    # Szukaj linków zawierających kadencję
-    for a in soup.find_all("a", href=True):
-        href = a["href"]
-        if "sesje" in href.lower() and kadencja_id[:4] in href:
-            if href.startswith("/"):
-                return BASE + href
-            elif href.startswith("http"):
-                return href
-
-    # Fallback — główna strona sesji
-    return f"{RADA_BASE}/sesje"
-
-
-def scrape_session_list(kadencja_id: str) -> list[dict]:
-    """Pobierz listę sesji z ich datami i linkami."""
-    sessions_url = discover_session_list_url(kadencja_id)
+def scrape_session_list_all(oldest_start: str, max_pages: int = 0) -> list[dict]:
+    """Pobierz paginowaną listę sesji z BIP (wszystkie kadencje od oldest_start)."""
     sessions = []
     page = 1
+    kadencja_start = oldest_start
 
     while True:
-        url = sessions_url if page == 1 else f"{sessions_url}?page={page}"
-        soup = fetch(url)
-
-        # Szukaj linków do sesji — różne możliwe wzorce
-        found_any = False
-
-        # Wzorzec 1: tabela z sesjami
-        for row in soup.select("table tr, .sesja-row, .list-group-item"):
-            links = row.find_all("a", href=True)
-            for link in links:
-                href = link["href"]
-                if "/sesja/" in href or "sesje" in href.lower():
-                    text = link.get_text(strip=True)
-                    session_info = parse_session_link(href, text, row)
-                    if session_info:
-                        sessions.append(session_info)
-                        found_any = True
-
-        # Wzorzec 2: lista linków
-        if not found_any:
-            for link in soup.find_all("a", href=True):
-                href = link["href"]
-                text = link.get_text(strip=True)
-                if re.search(r'sesj[aie].*\b[IVXLC]+\b', text, re.IGNORECASE):
-                    session_info = parse_session_link(href, text, link.parent)
-                    if session_info:
-                        sessions.append(session_info)
-                        found_any = True
-
-        # Wzorzec 3: Liferay asset publisher entries
-        if not found_any:
-            for entry in soup.select(".asset-abstract, .journal-content-article, .entry-content"):
-                links = entry.find_all("a", href=True)
-                text_full = entry.get_text()
-                for link in links:
-                    session_info = parse_session_link(link["href"], link.get_text(strip=True), entry)
-                    if session_info:
-                        sessions.append(session_info)
-                        found_any = True
-
-        # Paginacja
-        next_link = soup.find("a", string=re.compile(r"(następna|next|›|»)", re.I))
-        if next_link and found_any:
-            page += 1
+        if page == 1:
+            url = SESSIONS_URL
         else:
+            url = f"{SESSIONS_URL}?p_p_id={PORTLET_ID}&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&_{PORTLET_ID}_mvcPath=%2Fview.jsp&{PAGE_PARAM}={page}"
+
+        save = f"debug_sessions_page{page}.html" if page <= 3 else None
+        soup = fetch(url, save_as=save)
+        items = soup.select("li.search-entry-list-item")
+
+        if not items:
+            print(f"  Brak elementów na stronie {page}")
+            if page == 1:
+                print(f"  Zapisano HTML do debug_sessions_page1.html")
+            break
+
+        for item in items:
+            a = item.find("a", class_="search-entry-link-wrapper")
+            if not a or not a.get("href"):
+                continue
+
+            href = a["href"]
+            if not href.startswith("http"):
+                href = BIP_BASE + href
+
+            highlights = item.select(".search-entry-value-highlight")
+            outlines = item.select(".search-entry-value-highlight-outline")
+
+            number = highlights[0].get_text(strip=True) if highlights else ""
+            date = outlines[0].get_text(strip=True) if outlines else ""
+
+            if date and date < kadencja_start:
+                print(f"  Pominięto sesję {number} ({date}) — przed {oldest_start}")
+                return sessions
+
+            sessions.append({
+                "number": number,
+                "date": date,
+                "url": href,
+            })
+
+        # Paginacja — próbuj następną stronę dopóki są wyniki
+        # Liferay SPA nie zawsze ma poprawny .next-btn, więc inkrementujemy i sprawdzamy
+        page += 1
+        if max_pages > 0 and page > max_pages:
+            print(f"  (ograniczono do {max_pages} stron)")
             break
 
     print(f"  Znaleziono {len(sessions)} sesji")
     return sessions
 
 
-def parse_session_link(href: str, text: str, context_el) -> dict | None:
-    """Spróbuj wyciągnąć info o sesji z linka i kontekstu."""
-    # Wyciągnij numer sesji (rzymski)
-    roman_match = re.search(r'\b([IVXLC]{1,10})\b', text)
-    if not roman_match:
-        return None
+def find_docx_url(session: dict) -> str | None:
+    """Pobierz stronę sesji i znajdź link do wyniki_glosowania_*.docx."""
+    soup = fetch(session["url"], wait_for="article, .portlet-body")
 
-    number = roman_match.group(1)
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if "wyniki_glosowania" in href.lower() and href.endswith(".docx"):
+            # Normalizuj URL
+            if not href.startswith("http"):
+                href = BIP_BASE + href
+            return href
 
-    # Wyciągnij datę
-    date = None
-    context_text = context_el.get_text() if context_el else text
-    date_match = re.search(r'(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})', context_text)
-    if date_match:
-        d, m, y = date_match.groups()
-        date = f"{y}-{m.zfill(2)}-{d.zfill(2)}"
-    else:
-        date_match2 = re.search(r'(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})', context_text)
-        if date_match2:
-            y, m, d = date_match2.groups()
-            date = f"{y}-{m.zfill(2)}-{d.zfill(2)}"
+    # Fallback: dowolny docx z "glosowania" w nazwie
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if "glosowani" in href.lower() and ".docx" in href.lower():
+            if not href.startswith("http"):
+                href = BIP_BASE + href
+            return href
 
-    # Normalizuj URL
-    url = href
-    if url.startswith("/"):
-        url = BASE + url
-    elif not url.startswith("http"):
-        url = RADA_BASE + "/" + url
+    return None
 
-    return {
-        "number": number,
-        "date": date,
-        "url": url,
+
+def download_docx(url: str, dest: Path) -> bool:
+    """Pobierz plik docx przez requests (nie wymaga JS)."""
+    import requests as req
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
     }
+    try:
+        resp = req.get(url, headers=headers, timeout=30)
+        resp.raise_for_status()
+        dest.write_bytes(resp.content)
+        return True
+    except Exception as e:
+        print(f"    BŁĄD pobierania docx: {e}")
+        return False
 
 
-def scrape_session_votes(session: dict) -> list[dict]:
-    """Pobierz głosowania z danej sesji."""
-    soup = fetch(session["url"])
+def process_session_docx(session: dict, docx_dir: Path) -> list[dict]:
+    """Pobierz docx z wynikami głosowań sesji i sparsuj."""
+    from parse_wyniki_docx import parse_docx
+
+    docx_url = find_docx_url(session)
+    if not docx_url:
+        print(f"    Sesja {session['number']} ({session['date']}): brak docx z wynikami")
+        return []
+
+    # Pobierz docx
+    filename = f"wyniki_{session['number']}_{session['date']}.docx"
+    docx_path = docx_dir / filename
+
+    if not docx_path.exists():
+        print(f"    Pobieranie: {docx_url}")
+        if not download_docx(docx_url, docx_path):
+            return []
+    else:
+        print(f"    Cached: {docx_path.name}")
+
+    # Parsuj
+    try:
+        votes_raw = parse_docx(str(docx_path))
+    except Exception as e:
+        print(f"    BŁĄD parsowania {filename}: {e}")
+        return []
+
+    # Dodaj metadane sesji
     votes = []
-
-    # Szukaj linków do głosowań
-    for link in soup.find_all("a", href=True):
-        href = link["href"]
-        if "/glosowanie/" in href:
-            vote_id_match = re.search(r'/glosowanie/(\d+)', href)
-            if vote_id_match:
-                vote_id = vote_id_match.group(1)
-                topic = link.get_text(strip=True)
-                url = href if href.startswith("http") else BASE + href
-                votes.append({
-                    "id": vote_id,
-                    "topic": topic,
-                    "url": url,
-                    "session_date": session["date"],
-                    "session_number": session["number"],
-                })
+    for vi, v in enumerate(votes_raw):
+        vote_id = f"{session['date']}_{vi+1:03d}"
+        votes.append({
+            "id": vote_id,
+            "source_url": docx_url,
+            "session_date": session["date"],
+            "session_number": session["number"],
+            "topic": v["topic"],
+            "druk": v["druk"],
+            "resolution": None,
+            "counts": v["counts"],
+            "named_votes": v["named_votes"],
+        })
 
     print(f"    Sesja {session['number']} ({session['date']}): {len(votes)} głosowań")
     return votes
 
 
-def scrape_vote_details(vote: dict) -> dict:
-    """Pobierz szczegóły głosowania — wyniki imienne."""
-    soup = fetch(vote["url"])
+def load_profiles(profiles_path: str) -> dict:
+    """Wczytaj profiles.json z mapowaniem radny → klub.
 
-    named_votes = {
-        "za": [],
-        "przeciw": [],
-        "wstrzymal_sie": [],
-        "brak_glosu": [],
-        "nieobecni": [],
-    }
+    Obsługuje dwa formaty:
+    - Stary: {"councilors": [{"name": ..., "club": ...}]}
+    - Nowy (kompatybilny z template): {"profiles": [{"name": ..., "kadencje": {"2024-2029": {"club": ...}}}]}
+    """
+    path = Path(profiles_path)
+    if not path.exists():
+        print(f"  UWAGA: Brak {profiles_path} — kluby będą oznaczone jako '?'")
+        return {}
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
 
-    # Mapowanie nazw kategorii z HTML na klucze
-    CATEGORY_MAP = {
-        "za": "za",
-        "tak": "za",
-        "przeciw": "przeciw",
-        "nie": "przeciw",
-        "wstrzymał": "wstrzymal_sie",
-        "wstrzymał się": "wstrzymal_sie",
-        "wstrzymała się": "wstrzymal_sie",
-        "wstrzymali się": "wstrzymal_sie",
-        "nie głosował": "brak_glosu",
-        "nie głosowała": "brak_glosu",
-        "nie głosowali": "brak_glosu",
-        "brak głosu": "brak_glosu",
-        "nieobecn": "nieobecni",
-        "nieobecny": "nieobecni",
-        "nieobecna": "nieobecni",
-        "nieobecni": "nieobecni",
-    }
+    # Stary format
+    if "councilors" in data:
+        return {c["name"]: c for c in data["councilors"]}
 
-    # Strategia 1: tabela z kategoriami
-    current_category = None
-    for el in soup.find_all(["h2", "h3", "h4", "h5", "strong", "b", "th", "td", "p", "li", "div", "span"]):
-        text = el.get_text(strip=True).lower()
-
-        # Sprawdź czy to nagłówek kategorii
-        for cat_name, cat_key in CATEGORY_MAP.items():
-            if cat_name in text and len(text) < 50:
-                current_category = cat_key
-                break
-
-        # Jeśli mamy kategorię, szukaj nazwisk
-        if current_category and el.name in ["li", "td", "p", "span", "div"]:
-            name = el.get_text(strip=True)
-            # Sprawdź czy to wygląda jak imię i nazwisko
-            if re.match(r'^[A-ZŁŚŻŹĆŃ][a-złśżźćńęąó]+\s+[A-ZŁŚŻŹĆŃ]', name) and len(name) < 80:
-                # Oczyść z numerków, kropek itp
-                name = re.sub(r'^\d+[\.\)]\s*', '', name).strip()
-                if name and name.lower() not in CATEGORY_MAP:
-                    named_votes[current_category].append(name)
-
-    # Strategia 2: tabela gdzie każdy wiersz to radny + jego głos
-    if sum(len(v) for v in named_votes.values()) == 0:
-        for row in soup.find_all("tr"):
-            cells = row.find_all(["td", "th"])
-            if len(cells) >= 2:
-                name_cell = cells[0].get_text(strip=True)
-                vote_cell = cells[-1].get_text(strip=True).lower()
-                if re.match(r'^[A-ZŁŚŻŹĆŃ][a-złśżźćńęąó]+\s+[A-ZŁŚŻŹĆŃ]', name_cell):
-                    for cat_name, cat_key in CATEGORY_MAP.items():
-                        if cat_name in vote_cell:
-                            named_votes[cat_key].append(name_cell)
-                            break
-
-    # Policz wyniki
-    counts = {k: len(v) for k, v in named_votes.items()}
-
-    # Wyciągnij temat/druk jeśli nie mamy
-    topic = vote.get("topic", "")
-    if not topic or len(topic) < 5:
-        # Szukaj tytułu głosowania na stronie
-        title_el = soup.find(["h1", "h2"], string=re.compile(r'glosowanie|uchwał|druk|sprawi', re.I))
-        if title_el:
-            topic = title_el.get_text(strip=True)
-
-    # Druk nr
-    druk = None
-    druk_match = re.search(r'druk\s*(?:nr\s*)?(\d+[A-Z]?)', topic, re.I)
-    if druk_match:
-        druk = druk_match.group(1)
-
-    return {
-        "id": f"{vote['session_date']}_{vote['id']}",
-        "source_id": vote["id"],
-        "session_date": vote["session_date"],
-        "session_number": vote["session_number"],
-        "source_url": vote["url"],
-        "topic": topic,
-        "druk": druk,
-        "resolution": None,
-        "counts": counts,
-        "named_votes": named_votes,
-    }
+    # Nowy format (template-compatible)
+    result = {}
+    for p in data.get("profiles", []):
+        name = p["name"]
+        # Znajdź dane z najnowszej kadencji
+        kadencje = p.get("kadencje", {})
+        if kadencje:
+            latest = list(kadencje.values())[-1]
+            result[name] = {
+                "name": name,
+                "club": latest.get("club", "?"),
+                "district": latest.get("okręg"),
+            }
+    return result
 
 
-def build_councilors(all_votes: list[dict], sessions: list[dict]) -> list[dict]:
+def compute_club_majority(vote: dict, profiles: dict) -> dict[str, str]:
+    """Dla każdego klubu oblicz stanowisko większości w danym głosowaniu.
+
+    Zwraca dict: club → "za"/"przeciw"/"wstrzymal_sie"/"brak" (stanowisko większości).
+    """
+    club_votes = defaultdict(lambda: {"za": 0, "przeciw": 0, "wstrzymal_sie": 0})
+    for cat in ["za", "przeciw", "wstrzymal_sie"]:
+        for name in vote["named_votes"].get(cat, []):
+            club = profiles.get(name, {}).get("club", "?")
+            if club != "?":
+                club_votes[club][cat] += 1
+
+    majority = {}
+    for club, counts in club_votes.items():
+        best = max(counts, key=counts.get)
+        majority[club] = best
+    return majority
+
+
+def build_councilors(all_votes: list[dict], sessions: list[dict], profiles: dict) -> list[dict]:
     """Zbuduj statystyki radnych na podstawie głosowań."""
-    # Zbierz wszystkich radnych
     all_names = set()
     for v in all_votes:
         for cat_names in v["named_votes"].values():
             all_names.update(cat_names)
 
-    # Zbierz kluby (na razie nie mamy — trzeba osobno scrape'ować)
-    # TODO: dodać scraping klubów z um.warszawa.pl/waw/radawarszawy/radni-2024-2029
-
     councilors = {}
     for name in sorted(all_names):
+        prof = profiles.get(name, {})
         councilors[name] = {
             "name": name,
-            "club": "?",  # Trzeba uzupełnić
+            "club": prof.get("club", "?"),
+            "district": prof.get("district"),
             "votes_za": 0,
             "votes_przeciw": 0,
             "votes_wstrzymal": 0,
             "votes_brak": 0,
             "votes_nieobecny": 0,
-            "votes_total": 0,
             "sessions_present": set(),
-            "sessions_total": 0,
+            "votes_with_club": 0,
+            "votes_against_club": 0,
             "rebellions": [],
         }
 
-    # Policz głosy
     for v in all_votes:
+        club_majority = compute_club_majority(v, profiles)
+
         for name in v["named_votes"].get("za", []):
             if name in councilors:
                 councilors[name]["votes_za"] += 1
                 councilors[name]["sessions_present"].add(v["session_date"])
+                _check_rebellion(councilors[name], "za", club_majority, v)
         for name in v["named_votes"].get("przeciw", []):
             if name in councilors:
                 councilors[name]["votes_przeciw"] += 1
                 councilors[name]["sessions_present"].add(v["session_date"])
+                _check_rebellion(councilors[name], "przeciw", club_majority, v)
         for name in v["named_votes"].get("wstrzymal_sie", []):
             if name in councilors:
                 councilors[name]["votes_wstrzymal"] += 1
                 councilors[name]["sessions_present"].add(v["session_date"])
+                _check_rebellion(councilors[name], "wstrzymal_sie", club_majority, v)
         for name in v["named_votes"].get("brak_glosu", []):
             if name in councilors:
                 councilors[name]["votes_brak"] += 1
@@ -350,33 +380,87 @@ def build_councilors(all_votes: list[dict], sessions: list[dict]) -> list[dict]:
     result = []
     for c in councilors.values():
         present_votes = c["votes_za"] + c["votes_przeciw"] + c["votes_wstrzymal"] + c["votes_brak"]
-        c["votes_total"] = total_votes
-        c["sessions_total"] = total_sessions
-
         frekwencja = (len(c["sessions_present"]) / total_sessions * 100) if total_sessions > 0 else 0
         aktywnosc = (present_votes / total_votes * 100) if total_votes > 0 else 0
+        total_club_votes = c["votes_with_club"] + c["votes_against_club"]
+        zgodnosc = (c["votes_with_club"] / total_club_votes * 100) if total_club_votes > 0 else 0
 
         result.append({
             "name": c["name"],
             "club": c["club"],
+            "district": c["district"],
             "frekwencja": round(frekwencja, 1),
             "aktywnosc": round(aktywnosc, 1),
-            "zgodnosc_z_klubem": 0,  # TODO: obliczyć po uzupełnieniu klubów
+            "zgodnosc_z_klubem": round(zgodnosc, 1),
             "votes_za": c["votes_za"],
             "votes_przeciw": c["votes_przeciw"],
             "votes_wstrzymal": c["votes_wstrzymal"],
             "votes_brak": c["votes_brak"],
             "votes_nieobecny": c["votes_nieobecny"],
             "votes_total": total_votes,
-            "rebellion_count": 0,
-            "rebellions": [],
+            "rebellion_count": len(c["rebellions"]),
+            "rebellions": c["rebellions"][:20],  # max 20 najnowszych
         })
 
     return sorted(result, key=lambda x: x["name"])
 
 
+def _check_rebellion(councilor: dict, vote_cat: str, club_majority: dict, vote: dict):
+    """Sprawdź czy radny głosował inaczej niż większość klubu."""
+    club = councilor["club"]
+    if club == "?" or club not in club_majority:
+        return
+    majority_cat = club_majority[club]
+    if vote_cat == majority_cat:
+        councilor["votes_with_club"] += 1
+    else:
+        councilor["votes_against_club"] += 1
+        councilor["rebellions"].append({
+            "vote_id": vote["id"],
+            "topic": vote["topic"][:120],
+            "my_vote": vote_cat,
+            "club_majority": majority_cat,
+        })
+
+
+def compute_similarity(all_votes: list[dict], councilors_list: list[dict]) -> tuple[list, list]:
+    """Oblicz pary radnych o najwyższej/najniższej zgodności głosowań."""
+    from itertools import combinations
+
+    # Zbuduj wektor głosów per radny: vote_id → kategoria
+    name_to_club = {c["name"]: c["club"] for c in councilors_list}
+    vectors = defaultdict(dict)
+    for v in all_votes:
+        for cat in ["za", "przeciw", "wstrzymal_sie"]:
+            for name in v["named_votes"].get(cat, []):
+                vectors[name][v["id"]] = cat
+
+    names = sorted(vectors.keys())
+    pairs = []
+    for a, b in combinations(names, 2):
+        # Tylko głosowania gdzie obaj brali udział (za/przeciw/wstrzymał)
+        common = set(vectors[a].keys()) & set(vectors[b].keys())
+        if len(common) < 10:
+            continue
+        same = sum(1 for vid in common if vectors[a][vid] == vectors[b][vid])
+        score = round(same / len(common) * 100, 1)
+        pairs.append({
+            "a": a,
+            "b": b,
+            "club_a": name_to_club.get(a, "?"),
+            "club_b": name_to_club.get(b, "?"),
+            "score": score,
+            "common_votes": len(common),
+        })
+
+    pairs.sort(key=lambda x: x["score"], reverse=True)
+    top = pairs[:20]
+    bottom = pairs[-20:][::-1]
+    return top, bottom
+
+
 def build_sessions(sessions_raw: list[dict], all_votes: list[dict]) -> list[dict]:
-    """Zbuduj dane sesji z listą obecności."""
+    """Zbuduj dane sesji."""
     votes_by_session = defaultdict(list)
     for v in all_votes:
         votes_by_session[v["session_date"]].append(v)
@@ -386,7 +470,6 @@ def build_sessions(sessions_raw: list[dict], all_votes: list[dict]) -> list[dict
         date = s["date"]
         session_votes = votes_by_session.get(date, [])
 
-        # Lista obecnych — radni, którzy oddali jakikolwiek głos
         attendees = set()
         for v in session_votes:
             for cat in ["za", "przeciw", "wstrzymal_sie", "brak_glosu"]:
@@ -403,145 +486,167 @@ def build_sessions(sessions_raw: list[dict], all_votes: list[dict]) -> list[dict
     return sorted(result, key=lambda x: x["date"])
 
 
-def scrape_clubs() -> dict[str, str]:
-    """Spróbuj pobrać przynależność klubową radnych."""
-    clubs = {}
-    try:
-        soup = fetch(f"{RADA_BASE}/radni-2024-2029")
-        # Szukaj radnych z klubami — różne wzorce HTML
-        for el in soup.find_all(["div", "li", "tr", "article"]):
-            text = el.get_text()
-            # Szukaj wzorca: Imię Nazwisko ... Klub/Partia
-            name_match = re.search(r'([A-ZŁŚŻŹĆŃ][a-złśżźćńęąó]+\s+[A-ZŁŚŻŹĆŃ][a-złśżźćńęąó\-]+)', text)
-            if name_match:
-                name = name_match.group(1)
-                # Szukaj klubu w tym samym kontekście
-                club_patterns = [
-                    r'(Koalicja Obywatelska|KO)',
-                    r'(Prawo i Sprawiedliwość|PiS)',
-                    r'(Lewica)',
-                    r'(Trzecia Droga|TD)',
-                    r'(Konfederacja)',
-                    r'(Nowa Lewica|NL)',
-                ]
-                for pattern in club_patterns:
-                    club_match = re.search(pattern, text)
-                    if club_match:
-                        clubs[name] = club_match.group(1)
-                        break
-    except Exception as e:
-        print(f"  Nie udało się pobrać klubów: {e}")
+def assign_kadencja(session_date: str) -> str | None:
+    """Przypisz sesję do kadencji na podstawie daty."""
+    # Kadencje posortowane od najnowszej
+    sorted_kads = sorted(KADENCJE.items(), key=lambda x: x[1]["start"], reverse=True)
+    for kid, kinfo in sorted_kads:
+        if session_date >= kinfo["start"]:
+            return kid
+    return None
 
-    return clubs
+
+def build_kadencja_output(kid: str, sessions: list[dict], all_votes: list[dict], profiles: dict) -> dict:
+    """Zbuduj output jednej kadencji."""
+    kinfo = KADENCJE[kid]
+
+    councilors = build_councilors(all_votes, sessions, profiles)
+    sessions_data = build_sessions(sessions, all_votes)
+    sim_top, sim_bottom = compute_similarity(all_votes, councilors)
+
+    club_counts = defaultdict(int)
+    for c in councilors:
+        club_counts[c["club"]] += 1
+
+    print(f"  Kadencja {kid}: {len(sessions_data)} sesji, {len(all_votes)} głosowań, {len(councilors)} radnych")
+    print(f"    Pary podobieństwa: top={len(sim_top)}, bottom={len(sim_bottom)}")
+
+    return {
+        "id": kid,
+        "label": kinfo["label"],
+        "clubs": {club: count for club, count in sorted(club_counts.items())},
+        "sessions": sessions_data,
+        "total_sessions": len(sessions_data),
+        "total_votes": len(all_votes),
+        "total_councilors": len(councilors),
+        "councilors": councilors,
+        "votes": all_votes,
+        "similarity_top": sim_top,
+        "similarity_bottom": sim_bottom,
+    }
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Scraper Rady Miasta Warszawy")
-    parser.add_argument("--kadencja", default="2024-2029", help="ID kadencji (default: 2024-2029)")
-    parser.add_argument("--output", default="docs/data_warszawa.json", help="Plik wyjściowy")
+    parser = argparse.ArgumentParser(description="Scraper Rady Miasta Warszawy (BIP)")
+    parser.add_argument("--kadencja", default="2024-2029",
+                        help="ID kadencji (2024-2029, 2018-2024) lub 'all' dla wszystkich")
+    parser.add_argument("--output", default="docs/data.json", help="Plik wyjściowy")
     parser.add_argument("--delay", type=float, default=1.0, help="Opóźnienie między requestami (s)")
     parser.add_argument("--max-sessions", type=int, default=0, help="Maks. sesji do pobrania (0=wszystkie)")
+    parser.add_argument("--max-pages", type=int, default=0, help="Maks. stron paginacji (0=wszystkie)")
     parser.add_argument("--dry-run", action="store_true", help="Tylko lista sesji, bez głosowań")
+    parser.add_argument("--explore", action="store_true", help="Pobierz 1 sesję i pokaż strukturę HTML")
+    parser.add_argument("--profiles", default="docs/profiles.json", help="Plik profiles.json z klubami")
+    parser.add_argument("--headed", action="store_true", help="Pokaż okno przeglądarki (debug)")
     args = parser.parse_args()
 
     global DELAY
     DELAY = args.delay
 
-    kadencja_id = args.kadencja
-    kadencja_info = KADENCJE.get(kadencja_id, {"label": f"Kadencja {kadencja_id}"})
+    # Ustal które kadencje scrapować
+    if args.kadencja == "all":
+        target_kadencje = list(KADENCJE.keys())
+        oldest_start = min(k["start"] for k in KADENCJE.values())
+    else:
+        target_kadencje = [args.kadencja]
+        oldest_start = KADENCJE.get(args.kadencja, {}).get("start", "2024-01-01")
 
-    print(f"=== Radoskop Scraper: Rada m.st. Warszawy ===")
-    print(f"Kadencja: {kadencja_info['label']}")
+    print(f"=== Radoskop Scraper: Rada m.st. Warszawy (BIP) ===")
+    print(f"Kadencje: {', '.join(target_kadencje)}")
+    print(f"Backend: Playwright (headless={'nie' if args.headed else 'tak'})")
     print()
 
-    # 1. Lista sesji
-    print("[1/4] Pobieranie listy sesji...")
-    sessions = scrape_session_list(kadencja_id)
-    if not sessions:
-        print("BŁĄD: Nie znaleziono sesji. Strona mogła zmienić format.")
-        print("Sprawdź ręcznie: https://um.warszawa.pl/waw/radawarszawy/sesje")
-        sys.exit(1)
+    init_browser(headless=not args.headed)
 
-    if args.max_sessions > 0:
-        sessions = sessions[:args.max_sessions]
-        print(f"  (ograniczono do {args.max_sessions} sesji)")
+    try:
+        # 1. Lista sesji — pobierz wszystkie strony, potem filtruj po kadencji
+        print("[1/4] Pobieranie listy sesji...")
+        # Tymczasowo ustaw najstarszą kadencję żeby pobrać wszystkie sesje
+        all_sessions = scrape_session_list_all(oldest_start, max_pages=args.max_pages)
+        if not all_sessions:
+            print("BŁĄD: Nie znaleziono sesji. Strona mogła zmienić format.")
+            print(f"Sprawdź ręcznie: {SESSIONS_URL}")
+            sys.exit(1)
 
-    if args.dry_run:
-        print("\nZnalezione sesje:")
-        for s in sessions:
-            print(f"  {s['number']:>6} | {s['date'] or '???'} | {s['url']}")
-        return
+        if args.max_sessions > 0:
+            all_sessions = all_sessions[:args.max_sessions]
+            print(f"  (ograniczono do {args.max_sessions} sesji)")
 
-    # 2. Głosowania per sesja
-    print(f"\n[2/4] Pobieranie głosowań z {len(sessions)} sesji...")
-    all_votes_raw = []
-    for session in sessions:
-        votes = scrape_session_votes(session)
-        all_votes_raw.extend(votes)
+        if args.dry_run:
+            print("\nZnalezione sesje:")
+            for s in all_sessions:
+                kid = assign_kadencja(s["date"]) or "?"
+                print(f"  {s['number']:>8} | {s['date'] or '???'} | {kid} | {s['url']}")
+            return
 
-    print(f"  Razem: {len(all_votes_raw)} głosowań")
+        # Tryb eksploracji
+        if args.explore:
+            print(f"\n[explore] Pobieram stronę sesji: {all_sessions[0]['url']}")
+            soup = fetch(all_sessions[0]["url"], wait_for="article, .portlet-body", save_as="debug_session.html")
+            print(f"\n--- Wszystkie linki na stronie sesji ---")
+            for a in soup.find_all("a", href=True):
+                href = a["href"]
+                text = a.get_text(strip=True)[:100]
+                if text and not href.startswith("javascript"):
+                    print(f"  {text:<100} -> {href}")
+            return
 
-    # 3. Szczegóły głosowań
-    print(f"\n[3/4] Pobieranie wyników imiennych ({len(all_votes_raw)} głosowań)...")
-    all_votes = []
-    for i, v in enumerate(all_votes_raw):
-        try:
-            details = scrape_vote_details(v)
-            all_votes.append(details)
-            if (i + 1) % 10 == 0:
-                print(f"    ... {i+1}/{len(all_votes_raw)}")
-        except Exception as e:
-            print(f"    BŁĄD głosowanie {v['id']}: {e}")
+        # 2+3. Pobierz docx z wynikami głosowań i sparsuj
+        docx_dir = Path(args.output).parent / "docx_cache"
+        docx_dir.mkdir(parents=True, exist_ok=True)
 
-    # 4. Buduj output
-    print(f"\n[4/4] Budowanie pliku wyjściowego...")
+        print(f"\n[2/3] Pobieranie i parsowanie wyników głosowań...")
+        all_votes = []
+        for session in all_sessions:
+            votes = process_session_docx(session, docx_dir)
+            all_votes.extend(votes)
 
-    # Spróbuj pobrać kluby
-    clubs = scrape_clubs()
-    councilors = build_councilors(all_votes, sessions)
-    if clubs:
-        for c in councilors:
-            if c["name"] in clubs:
-                c["club"] = clubs[c["name"]]
+        print(f"  Razem: {len(all_votes)} głosowań z {len(all_sessions)} sesji")
 
-    sessions_data = build_sessions(sessions, all_votes)
+        if not all_votes:
+            print("UWAGA: Nie znaleziono głosowań. Użyj --explore żeby zbadać strukturę strony sesji.")
+            sys.exit(1)
 
-    output = {
-        "generated": datetime.now().isoformat(),
-        "default_kadencja": kadencja_id,
-        "kadencje": [{
-            "id": kadencja_id,
-            "label": kadencja_info["label"],
-            "sessions": sessions_data,
-            "total_sessions": len(sessions_data),
-            "total_votes": len(all_votes),
-            "total_councilors": len(councilors),
-            "councilors": councilors,
-            "votes": all_votes,
-            "similarity_top": [],  # TODO: oblicz po uzupełnieniu klubów
-            "similarity_bottom": [],
-        }]
-    }
+        # 4. Buduj output per kadencja
+        print(f"\n[4/4] Budowanie pliku wyjściowego...")
+        profiles = load_profiles(args.profiles)
+        if profiles:
+            print(f"  Załadowano profile: {len(profiles)} radnych")
 
-    out_path = Path(args.output)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+        # Grupuj sesje i głosowania per kadencja
+        kadencje_output = []
+        for kid in target_kadencje:
+            kinfo = KADENCJE[kid]
+            k_sessions = [s for s in all_sessions if assign_kadencja(s["date"]) == kid]
+            k_votes = [v for v in all_votes if assign_kadencja(v["session_date"]) == kid]
+            if not k_votes:
+                print(f"  Kadencja {kid}: brak głosowań — pomijam")
+                continue
+            kad_out = build_kadencja_output(kid, k_sessions, k_votes, profiles)
+            kadencje_output.append(kad_out)
 
-    print(f"\nGotowe! Zapisano do {out_path}")
-    print(f"  Sesji: {len(sessions_data)}")
-    print(f"  Głosowań: {len(all_votes)}")
-    print(f"  Radnych: {len(councilors)}")
+        default_kid = target_kadencje[0]
+        output = {
+            "generated": datetime.now().isoformat(),
+            "default_kadencja": default_kid,
+            "kadencje": kadencje_output,
+        }
 
-    # Podsumowanie jakości
-    votes_with_names = sum(1 for v in all_votes if sum(len(nv) for nv in v["named_votes"].values()) > 0)
-    print(f"  Głosowań z wynikami imiennymi: {votes_with_names}/{len(all_votes)}")
+        out_path = Path(args.output)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(output, f, ensure_ascii=False, indent=2)
 
-    if clubs:
-        with_club = sum(1 for c in councilors if c["club"] != "?")
-        print(f"  Radnych z rozpoznanym klubem: {with_club}/{len(councilors)}")
-    else:
-        print("  UWAGA: Nie udało się pobrać klubów — trzeba uzupełnić ręcznie")
+        print(f"\nGotowe! Zapisano do {out_path}")
+        print(f"  Sesji: {len(sessions_data)}")
+        print(f"  Głosowań: {len(all_votes)}")
+        print(f"  Radnych: {len(councilors)}")
+
+        votes_with_names = sum(1 for v in all_votes if sum(len(nv) for nv in v["named_votes"].values()) > 0)
+        print(f"  Głosowań z wynikami imiennymi: {votes_with_names}/{len(all_votes)}")
+
+    finally:
+        close_browser()
 
 
 if __name__ == "__main__":

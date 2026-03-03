@@ -1,0 +1,1805 @@
+{
+  "profiles": [
+    {
+      "name": "Agata Diduszko-Zyglewska",
+      "slug": "agata-diduszko-zyglewska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "Lewica",
+          "club_full": "Lewica",
+          "okręg": 1,
+          "okręg_dzielnice": "Śródmieście i Ochota",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 94.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 397,
+          "votes_przeciw": 33,
+          "votes_wstrzymal": 39,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Agata Korc",
+      "slug": "agata-korc",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 5,
+          "okręg_dzielnice": "Bielany i Żoliborz",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 97.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 306,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 38,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Agnieszka Borowska",
+      "slug": "agnieszka-borowska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 6,
+          "okręg_dzielnice": "Białołęka",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 97.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 306,
+          "votes_przeciw": 147,
+          "votes_wstrzymal": 30,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Agnieszka Gierzyńska-Kierwińska",
+      "slug": "agnieszka-gierzynska-kierwinska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 1,
+          "okręg_dzielnice": "Śródmieście i Ochota",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 94.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 309,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 24,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Agnieszka Miękwicz",
+      "slug": "agnieszka-miekwicz",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 8,
+          "okręg_dzielnice": "Ursynów, Wilanów i Włochy",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 314,
+          "votes_przeciw": 137,
+          "votes_wstrzymal": 26,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Agnieszka Wyrwał",
+      "slug": "agnieszka-wyrwa",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 5,
+          "okręg_dzielnice": "Bielany i Żoliborz",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 95.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 309,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 27,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Alicja Żebrowska",
+      "slug": "alicja-zebrowska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 10,
+          "okręg_dzielnice": "Praga-Północ i Targówek",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 91.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 370,
+          "votes_przeciw": 33,
+          "votes_wstrzymal": 53,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Anna Auksel-Sekutowicz",
+      "slug": "anna-auksel-sekutowicz",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 6,
+          "okręg_dzielnice": "Białołęka",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 315,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 28,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Anna Nehrebecka-Byczewska",
+      "slug": "anna-nehrebecka-byczewska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 1,
+          "okręg_dzielnice": "Śródmieście i Ochota",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 60.0,
+          "aktywnosc": 88.5,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 271,
+          "votes_przeciw": 133,
+          "votes_wstrzymal": 36,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Barbara Socha",
+      "slug": "barbara-socha",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 7,
+          "okręg_dzielnice": "Rembertów, Wawer i Wesoła",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 93.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 360,
+          "votes_przeciw": 44,
+          "votes_wstrzymal": 58,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Beata Michalec",
+      "slug": "beata-michalec",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 10,
+          "okręg_dzielnice": "Praga-Północ i Targówek",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 93.6,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 300,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 27,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Christian Młynarek",
+      "slug": "christian-mynarek",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 8,
+          "okręg_dzielnice": "Ursynów, Wilanów i Włochy",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 97.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 372,
+          "votes_przeciw": 49,
+          "votes_wstrzymal": 61,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Damian Kowalczyk",
+      "slug": "damian-kowalczyk",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 2,
+          "okręg_dzielnice": "Praga-Południe",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 86.9,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 326,
+          "votes_przeciw": 36,
+          "votes_wstrzymal": 70,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Dariusz Figura",
+      "slug": "dariusz-figura",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 5,
+          "okręg_dzielnice": "Bielany i Żoliborz",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 98.6,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 389,
+          "votes_przeciw": 49,
+          "votes_wstrzymal": 52,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Dorota Lutomirska",
+      "slug": "dorota-lutomirska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 2,
+          "okręg_dzielnice": "Praga-Południe",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 60.0,
+          "aktywnosc": 81.5,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 230,
+          "votes_przeciw": 150,
+          "votes_wstrzymal": 25,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Elżbieta Łaniewska",
+      "slug": "elzbieta-aniewska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 6,
+          "okręg_dzielnice": "Białołęka",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 93.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 296,
+          "votes_przeciw": 145,
+          "votes_wstrzymal": 25,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Ewa Janczar",
+      "slug": "ewa-janczar",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 7,
+          "okręg_dzielnice": "Rembertów, Wawer i Wesoła",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 94.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 304,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 27,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Ewa Malinowska-Grupińska",
+      "slug": "ewa-malinowska-grupinska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 8,
+          "okręg_dzielnice": "Ursynów, Wilanów i Włochy",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 93.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 294,
+          "votes_przeciw": 146,
+          "votes_wstrzymal": 26,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Filip Frąckowiak",
+      "slug": "filip-frackowiak",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 1,
+          "okręg_dzielnice": "Śródmieście i Ochota",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 84.7,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 335,
+          "votes_przeciw": 41,
+          "votes_wstrzymal": 45,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Grażyna Wereszczyńska",
+      "slug": "grazyna-wereszczynska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 1,
+          "okręg_dzielnice": "Śródmieście i Ochota",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 81.7,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 318,
+          "votes_przeciw": 47,
+          "votes_wstrzymal": 41,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Iwona Pawłowska",
+      "slug": "iwona-pawowska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 8,
+          "okręg_dzielnice": "Ursynów, Wilanów i Włochy",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 98.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 310,
+          "votes_przeciw": 136,
+          "votes_wstrzymal": 45,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Iwona Wujastyk",
+      "slug": "iwona-wujastyk",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 10,
+          "okręg_dzielnice": "Praga-Północ i Targówek",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 86.7,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 272,
+          "votes_przeciw": 136,
+          "votes_wstrzymal": 23,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Jacek Cieślikowski",
+      "slug": "jacek-cieslikowski",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 3,
+          "okręg_dzielnice": "Mokotów",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 100.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 328,
+          "votes_przeciw": 79,
+          "votes_wstrzymal": 92,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Jan Mencwel",
+      "slug": "jan-mencwel",
+      "kadencje": {
+        "2024-2029": {
+          "club": "Lewica",
+          "club_full": "Lewica",
+          "okręg": 10,
+          "okręg_dzielnice": "Praga-Północ i Targówek",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 92.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 382,
+          "votes_przeciw": 29,
+          "votes_wstrzymal": 48,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Jarosław Jóźwiak",
+      "slug": "jarosaw-jozwiak",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 9,
+          "okręg_dzielnice": "Bemowo i Ursus",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 315,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 25,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Jarosław Szostakowski",
+      "slug": "jarosaw-szostakowski",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 3,
+          "okręg_dzielnice": "Mokotów",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 93.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 293,
+          "votes_przeciw": 133,
+          "votes_wstrzymal": 37,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Joanna Krzemień",
+      "slug": "joanna-krzemien",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 9,
+          "okręg_dzielnice": "Bemowo i Ursus",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.6,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 304,
+          "votes_przeciw": 137,
+          "votes_wstrzymal": 39,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Joanna Staniszkis",
+      "slug": "joanna-staniszkis",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 1,
+          "okręg_dzielnice": "Śródmieście i Ochota",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 95.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 309,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 27,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Joanna Wiśniewska-Najgebauer",
+      "slug": "joanna-wisniewska-najgebauer",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 3,
+          "okręg_dzielnice": "Mokotów",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 87.3,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 274,
+          "votes_przeciw": 133,
+          "votes_wstrzymal": 27,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Jolanta Kasztelan",
+      "slug": "jolanta-kasztelan",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 8,
+          "okręg_dzielnice": "Ursynów, Wilanów i Włochy",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 98.6,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 389,
+          "votes_przeciw": 38,
+          "votes_wstrzymal": 63,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Justyna Zając",
+      "slug": "justyna-zajac",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 2,
+          "okręg_dzielnice": "Praga-Południe",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 97.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 303,
+          "votes_przeciw": 137,
+          "votes_wstrzymal": 42,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Kamila Gołębiowska",
+      "slug": "kamila-goebiowska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "Lewica",
+          "club_full": "Lewica",
+          "okręg": 9,
+          "okręg_dzielnice": "Bemowo i Ursus",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 60.0,
+          "aktywnosc": 87.9,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 386,
+          "votes_przeciw": 24,
+          "votes_wstrzymal": 27,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Karolina Zioło-Pużuk",
+      "slug": "karolina-zioo-puzuk",
+      "kadencje": {
+        "2024-2029": {
+          "club": "Lewica",
+          "club_full": "Lewica",
+          "okręg": 8,
+          "okręg_dzielnice": "Ursynów, Wilanów i Włochy",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 94.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 400,
+          "votes_przeciw": 38,
+          "votes_wstrzymal": 33,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Krystian Wilk",
+      "slug": "krystian-wilk",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 4,
+          "okręg_dzielnice": "Wola",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 91.3,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 286,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 30,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Maciej Binkowski",
+      "slug": "maciej-binkowski",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 4,
+          "okręg_dzielnice": "Wola",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 81.5,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 329,
+          "votes_przeciw": 38,
+          "votes_wstrzymal": 38,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Magdalena Gogol",
+      "slug": "magdalena-gogol",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 9,
+          "okręg_dzielnice": "Bemowo i Ursus",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 60.0,
+          "aktywnosc": 69.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 191,
+          "votes_przeciw": 133,
+          "votes_wstrzymal": 19,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Marcin Kluś",
+      "slug": "marcin-klus",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 2,
+          "okręg_dzielnice": "Praga-Południe",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 313,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 26,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Mariusz Budziszewski",
+      "slug": "mariusz-budziszewski",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 4,
+          "okręg_dzielnice": "Wola",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 94.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 302,
+          "votes_przeciw": 134,
+          "votes_wstrzymal": 33,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Marta Jabłońska",
+      "slug": "marta-jabonska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 3,
+          "okręg_dzielnice": "Mokotów",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 60.0,
+          "aktywnosc": 80.5,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 241,
+          "votes_przeciw": 136,
+          "votes_wstrzymal": 23,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Marta Szczepańska",
+      "slug": "marta-szczepanska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "Lewica",
+          "club_full": "Lewica",
+          "okręg": 5,
+          "okręg_dzielnice": "Bielany i Żoliborz",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 392,
+          "votes_przeciw": 35,
+          "votes_wstrzymal": 52,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Martyna Jałoszyńska",
+      "slug": "martyna-jaoszynska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "Lewica",
+          "club_full": "Lewica",
+          "okręg": 2,
+          "okręg_dzielnice": "Praga-Południe",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 99.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 422,
+          "votes_przeciw": 35,
+          "votes_wstrzymal": 36,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Małgorzata Zakrzewska",
+      "slug": "magorzata-zakrzewska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 3,
+          "okręg_dzielnice": "Mokotów",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 97.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 307,
+          "votes_przeciw": 137,
+          "votes_wstrzymal": 40,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Melania Łuczak",
+      "slug": "melania-uczak",
+      "kadencje": {
+        "2024-2029": {
+          "club": "Lewica",
+          "club_full": "Lewica",
+          "okręg": 3,
+          "okręg_dzielnice": "Mokotów",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 92.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 381,
+          "votes_przeciw": 27,
+          "votes_wstrzymal": 50,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Michalina Szymborska",
+      "slug": "michalina-szymborska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 3,
+          "okręg_dzielnice": "Mokotów",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 84.3,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 284,
+          "votes_przeciw": 62,
+          "votes_wstrzymal": 73,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Michał Matejka",
+      "slug": "micha-matejka",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 8,
+          "okręg_dzielnice": "Ursynów, Wilanów i Włochy",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 95.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 315,
+          "votes_przeciw": 136,
+          "votes_wstrzymal": 25,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Patrycja Czerska-Wysocka",
+      "slug": "patrycja-czerska-wysocka",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 9,
+          "okręg_dzielnice": "Bemowo i Ursus",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 94.6,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 310,
+          "votes_przeciw": 134,
+          "votes_wstrzymal": 26,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Patryk Milewski",
+      "slug": "patryk-milewski",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 6,
+          "okręg_dzielnice": "Białołęka",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 97.6,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 309,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 38,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Paweł Lech",
+      "slug": "pawe-lech",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 2,
+          "okręg_dzielnice": "Praga-Południe",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 93.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 283,
+          "votes_przeciw": 132,
+          "votes_wstrzymal": 51,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Piotr Mazurek",
+      "slug": "piotr-mazurek",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 10,
+          "okręg_dzielnice": "Praga-Północ i Targówek",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 100.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 336,
+          "votes_przeciw": 56,
+          "votes_wstrzymal": 107,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Piotr Szyszko",
+      "slug": "piotr-szyszko",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 7,
+          "okręg_dzielnice": "Rembertów, Wawer i Wesoła",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 99.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 379,
+          "votes_przeciw": 46,
+          "votes_wstrzymal": 68,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Piotr Wertenstein-Żuławski",
+      "slug": "piotr-wertenstein-zuawski",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 5,
+          "okręg_dzielnice": "Bielany i Żoliborz",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 95.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 311,
+          "votes_przeciw": 139,
+          "votes_wstrzymal": 26,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Renata Królak",
+      "slug": "renata-krolak",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 5,
+          "okręg_dzielnice": "Bielany i Żoliborz",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 313,
+          "votes_przeciw": 138,
+          "votes_wstrzymal": 27,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Renata Niewitecka",
+      "slug": "renata-niewitecka",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 4,
+          "okręg_dzielnice": "Wola",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.4,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 313,
+          "votes_przeciw": 139,
+          "votes_wstrzymal": 27,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Sandra Spinkiewicz",
+      "slug": "sandra-spinkiewicz",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 7,
+          "okręg_dzielnice": "Rembertów, Wawer i Wesoła",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 90.1,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 276,
+          "votes_przeciw": 132,
+          "votes_wstrzymal": 40,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Sylwia Krajewska",
+      "slug": "sylwia-krajewska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 8,
+          "okręg_dzielnice": "Ursynów, Wilanów i Włochy",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 93.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 290,
+          "votes_przeciw": 135,
+          "votes_wstrzymal": 38,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Sławomir Potapowicz",
+      "slug": "sawomir-potapowicz",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 7,
+          "okręg_dzielnice": "Rembertów, Wawer i Wesoła",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 95.8,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 311,
+          "votes_przeciw": 137,
+          "votes_wstrzymal": 28,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Tomasz Herbich",
+      "slug": "tomasz-herbich",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 9,
+          "okręg_dzielnice": "Bemowo i Ursus",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 70.0,
+          "aktywnosc": 95.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 384,
+          "votes_przeciw": 38,
+          "votes_wstrzymal": 50,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Tomasz Sybilski",
+      "slug": "tomasz-sybilski",
+      "kadencje": {
+        "2024-2029": {
+          "club": "KO",
+          "club_full": "Koalicja Obywatelska",
+          "okręg": 10,
+          "okręg_dzielnice": "Praga-Północ i Targówek",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 96.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 290,
+          "votes_przeciw": 150,
+          "votes_wstrzymal": 38,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Wojciech Zabłocki",
+      "slug": "wojciech-zabocki",
+      "kadencje": {
+        "2024-2029": {
+          "club": "PiS",
+          "club_full": "Prawo i Sprawiedliwość",
+          "okręg": 6,
+          "okręg_dzielnice": "Białołęka",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 80.0,
+          "aktywnosc": 100.2,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 377,
+          "votes_przeciw": 53,
+          "votes_wstrzymal": 68,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    },
+    {
+      "name": "Zofia Smełka-Leszczyńska",
+      "slug": "zofia-smeka-leszczynska",
+      "kadencje": {
+        "2024-2029": {
+          "club": "Lewica",
+          "club_full": "Lewica",
+          "okręg": 4,
+          "okręg_dzielnice": "Wola",
+          "roles": [],
+          "komisje": [],
+          "notes": "",
+          "mid_term": false,
+          "former": false,
+          "frekwencja": 60.0,
+          "aktywnosc": 67.0,
+          "zgodnosc_z_klubem": 0,
+          "votes_za": 274,
+          "votes_przeciw": 28,
+          "votes_wstrzymal": 31,
+          "votes_brak": 0,
+          "votes_nieobecny": 0,
+          "votes_total": 497,
+          "rebellion_count": 0,
+          "rebellions": [],
+          "has_voting_data": true,
+          "has_activity_data": false
+        }
+      }
+    }
+  ],
+  "total": 60
+}
