@@ -638,12 +638,10 @@ def main():
             json.dump(output, f, ensure_ascii=False, indent=2)
 
         print(f"\nGotowe! Zapisano do {out_path}")
-        print(f"  Sesji: {len(sessions_data)}")
-        print(f"  Głosowań: {len(all_votes)}")
-        print(f"  Radnych: {len(councilors)}")
-
-        votes_with_names = sum(1 for v in all_votes if sum(len(nv) for nv in v["named_votes"].values()) > 0)
-        print(f"  Głosowań z wynikami imiennymi: {votes_with_names}/{len(all_votes)}")
+        for kad in output["kadencje"]:
+            total_v = len(kad["votes"])
+            named_v = sum(1 for v in kad["votes"] if sum(len(nv) for nv in v["named_votes"].values()) > 0)
+            print(f"  {kad['id']}: {len(kad['sessions'])} sesji, {total_v} głosowań ({named_v} z wynikami imiennymi), {len(kad['councilors'])} radnych")
 
     finally:
         close_browser()
