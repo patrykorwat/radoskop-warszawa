@@ -493,8 +493,9 @@ def _check_rebellion(councilor: dict, vote_cat: str, club_majority: dict, vote: 
         councilor["votes_against_club"] += 1
         councilor["rebellions"].append({
             "vote_id": vote["id"],
+            "session": vote["session_date"],
             "topic": vote["topic"][:120],
-            "my_vote": vote_cat,
+            "their_vote": vote_cat,
             "club_majority": majority_cat,
         })
 
