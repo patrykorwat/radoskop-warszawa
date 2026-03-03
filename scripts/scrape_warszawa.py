@@ -669,8 +669,20 @@ def merge_stats_to_profiles(profiles_path: str, output: dict):
             stats[(kid, c["name"])] = c
 
     updated = 0
+    # Build reverse lookup: name -> set of kadencja IDs they appear in
+    name_kadencje: dict[str, set[str]] = {}
+    for (kid, name) in stats:
+        name_kadencje.setdefault(name, set()).add(kid)
+
     for p in profiles.get("profiles", []):
-        for kid, entry in p.get("kadencje", {}).items():
+        if "kadencje" not in p:
+            p["kadencje"] = {}
+        # Add missing kadencje for this person
+        for kid in name_kadencje.get(p["name"], set()):
+            if kid not in p["kadencje"]:
+                p["kadencje"][kid] = {}
+
+        for kid, entry in p["kadencje"].items():
             c = stats.get((kid, p["name"]))
             if not c:
                 continue
@@ -678,9 +690,12 @@ def merge_stats_to_profiles(profiles_path: str, output: dict):
             for key in ["frekwencja", "aktywnosc", "zgodnosc_z_klubem",
                         "votes_za", "votes_przeciw", "votes_wstrzymal",
                         "votes_brak", "votes_nieobecny", "votes_total",
-                        "rebellion_count", "rebellions"]:
+                        "rebellion_count", "rebellions",
+                        "sessions_attended", "attendance_count"]:
                 if key in c:
                     entry[key] = c[key]
+            if not entry.get("club") and c.get("club"):
+                entry["club"] = c["club"]
             entry["has_voting_data"] = True
             # Merge activity stats
             entry["has_activity_data"] = c.get("has_activity_data", False)
