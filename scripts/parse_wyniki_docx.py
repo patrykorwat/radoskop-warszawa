@@ -127,6 +127,11 @@ def parse_docx(filepath: str) -> list[dict]:
             # - zaczyna się od "–", "—", "- ", "−" (wnioski)
             # - zaczyna się od "Uchwała Nr" (przyjęte uchwały)
             # - zaczyna się od "Projekt uchwały" lub "Projekt stanowiska"
+            # Pomiń standalone "Radni głosowali..." — to wyniki, nie temat
+            if text_lower.startswith("radni głosowali"):
+                i += 1
+                continue
+
             is_vote_topic = (
                 text.startswith("–") or text.startswith("—") or
                 text.startswith("- ") or text.startswith("−") or
@@ -134,10 +139,13 @@ def parse_docx(filepath: str) -> list[dict]:
                 text.startswith("Projekt uchwały") or
                 text.startswith("Projekt stanowiska") or
                 text.startswith("Przyjęcie protokołu") or
-                text.startswith("Stanowisko nr") or
-                re.match(r"Radni głosowali", text)
+                text.startswith("Stanowisko nr")
             )
             if is_vote_topic:
+                # Odetnij wyniki głosowania z tematu ("Radni głosowali..." i dalej)
+                cut = re.search(r"Radni głosowali", text)
+                if cut:
+                    text = text[:cut.start()].rstrip()
                 # Zapisz poprzednie głosowanie
                 if current_vote:
                     finalize_vote(current_vote)
@@ -152,8 +160,15 @@ def parse_docx(filepath: str) -> list[dict]:
                 # Parsuj wyniki liczbowe z tekstu
                 counts = parse_counts_from_text(text)
 
+                # Wyczyść temat: nbsp → spacja, leading dash
+                clean_topic = text.replace("\xa0", " ").strip()
+                if clean_topic.startswith(("– ", "— ", "- ", "− ")):
+                    clean_topic = clean_topic[2:].strip()
+                elif clean_topic.startswith(("–", "—", "-", "−")):
+                    clean_topic = clean_topic[1:].strip()
+
                 current_vote = {
-                    "topic": text,
+                    "topic": clean_topic,
                     "druk": druk,
                     "counts_declared": counts,
                     "named_votes": {
