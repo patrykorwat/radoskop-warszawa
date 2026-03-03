@@ -219,13 +219,20 @@ def parse_counts_from_text(text: str) -> dict:
 
 
 def finalize_vote(vote: dict):
-    """Dodaj policzone counts z list imiennych."""
+    """Dodaj policzone counts z list imiennych, deduplikuj cross-category."""
+    nv = vote["named_votes"]
+    # Deduplikacja: pierwsza tabela po temacie bywa pełną listą głosujących,
+    # a nie tylko "za". Kategorie z explicite nagłówków (PRZECIW:, WSTRZYMUJĘ SIĘ: itd.)
+    # mają priorytet — usuwamy z "za" osoby które są w bardziej specyficznych listach.
+    others = set(nv["przeciw"]) | set(nv["wstrzymal_sie"]) | set(nv["brak_glosu"])
+    if others & set(nv["za"]):
+        nv["za"] = [n for n in nv["za"] if n not in others]
     vote["counts"] = {
-        "za": len(vote["named_votes"]["za"]),
-        "przeciw": len(vote["named_votes"]["przeciw"]),
-        "wstrzymal_sie": len(vote["named_votes"]["wstrzymal_sie"]),
-        "brak_glosu": len(vote["named_votes"]["brak_glosu"]),
-        "nieobecni": len(vote["named_votes"]["nieobecni"]),
+        "za": len(nv["za"]),
+        "przeciw": len(nv["przeciw"]),
+        "wstrzymal_sie": len(nv["wstrzymal_sie"]),
+        "brak_glosu": len(nv["brak_glosu"]),
+        "nieobecni": len(nv["nieobecni"]),
     }
 
 
