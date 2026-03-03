@@ -273,7 +273,6 @@ footer a { color:var(--accent); text-decoration:none; }
     Radoskop — otwarte narzędzie monitoringu samorządu.
     Dane źródłowe: <a href="https://bip.warszawa.pl/sesje-rady-m.st.-warszawy" target="_blank">BIP Warszawa</a>.
     Kod: <a href="https://github.com/patrykorwat/radoskop-warszawa" target="_blank">GitHub</a> (AGPL-3.0).
-    <br>Zobacz też: <a href="https://gdansk.radoskop.pl/">Radoskop Gdańsk</a>
   </footer>
 </div>
 
@@ -307,9 +306,9 @@ async function init() {
   }
   try {
     const [dataResp, profResp, budgetResp] = await Promise.all([
-      fetch('data.json'),
-      fetch('profiles.json'),
-      fetch('budget.json')
+      fetch('/data.json'),
+      fetch('/profiles.json'),
+      fetch('/budget.json')
     ]);
     RAW = await dataResp.json();
     PROFILES = await profResp.json();
@@ -419,7 +418,7 @@ function hideAllViews() {
 let currentTab = 'ranking';
 const TAB_SLUGS = {ranking:'ranking',profiles:'radni',sessions:'sesje',votes:'glosowania',similarity:'podobienstwo',budget:'budzet'};
 const SLUG_TABS = Object.fromEntries(Object.entries(TAB_SLUGS).map(([k,v])=>[v,k]));
-const KAD_SLUGS = {'2018-2023':'viii','2024-2029':'ix'};
+const KAD_SLUGS = {'2018-2024':'viii','2024-2029':'ix'};
 const SLUG_KADS = Object.fromEntries(Object.entries(KAD_SLUGS).map(([k,v])=>[v,k]));
 
 function mainPath(tab, kid) {
@@ -620,7 +619,8 @@ function showProfile(name) {
     const allKadencje = RAW.kadencje.map(k => k.id);
     html += `<div class="profile-kadencja-toggle">`;
     for (const k of allKadencje) {
-      const label = k === '2018-2023' ? 'VIII kadencja (2018–2024)' : 'IX kadencja (2024–2029)';
+      const kadObj = RAW.kadencje.find(kk => kk.id === k);
+      const label = kadObj ? kadObj.label : k;
       const hasData = kids.includes(k);
       if (hasData) {
         html += `<button class="kadencja-btn ${k===kid?'active':''}" onclick="window._profileKadSwitch('${k}')">${label}</button>`;
@@ -735,7 +735,7 @@ function showProfile(name) {
     }
 
     // Kadencje history
-    const kadencjeLabels = { '2018-2023': 'VIII kadencja (2018–2024)', '2024-2029': 'IX kadencja (2024–2029)' };
+    const kadencjeLabels = Object.fromEntries(RAW.kadencje.map(k => [k.id, k.label]));
     html += `<div class="profile-meta-card">
       <h3>Kadencje</h3>
       ${kids.map(k => {

@@ -9,7 +9,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 python3 -m venv "$PROJECT_DIR/.venv" 2>/dev/null || true
 source "$PROJECT_DIR/.venv/bin/activate"
-pip install --quiet playwright beautifulsoup4 lxml python-docx requests
+pip install --quiet playwright beautifulsoup4 lxml python-docx requests pymupdf
 playwright install chromium 2>/dev/null
 
 python3 "$SCRIPT_DIR/scrape_warszawa.py" \

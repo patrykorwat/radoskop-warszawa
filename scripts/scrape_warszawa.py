@@ -184,27 +184,74 @@ def scrape_session_list_all(oldest_start: str, max_pages: int = 0) -> list[dict]
     return sessions
 
 
+_session_soup_cache: dict[str, "BeautifulSoup"] = {}
+
+
+def _get_session_soup(session: dict):
+    """Pobierz i zcachuj stronę sesji (unikamy podwójnego fetcha)."""
+    url = session["url"]
+    if url not in _session_soup_cache:
+        _session_soup_cache[url] = fetch(url, wait_for="article, .portlet-body")
+    return _session_soup_cache[url]
+
+
+def _normalize_href(href: str) -> str:
+    if not href.startswith("http"):
+        return BIP_BASE + href
+    return href
+
+
 def find_docx_url(session: dict) -> str | None:
     """Pobierz stronę sesji i znajdź link do wyniki_glosowania_*.docx."""
-    soup = fetch(session["url"], wait_for="article, .portlet-body")
+    soup = _get_session_soup(session)
 
     for a in soup.find_all("a", href=True):
         href = a["href"]
-        if "wyniki_glosowania" in href.lower() and href.endswith(".docx"):
-            # Normalizuj URL
-            if not href.startswith("http"):
-                href = BIP_BASE + href
-            return href
+        if "wyniki_glosowania" in href.lower() and ".docx" in href.lower():
+            return _normalize_href(href)
 
     # Fallback: dowolny docx z "glosowania" w nazwie
     for a in soup.find_all("a", href=True):
         href = a["href"]
         if "glosowani" in href.lower() and ".docx" in href.lower():
-            if not href.startswith("http"):
-                href = BIP_BASE + href
-            return href
+            return _normalize_href(href)
 
     return None
+
+
+def find_transcript_url(session: dict) -> str | None:
+    """Znajdź link do transkrypcji stenogramu (preferuj DOCX wersja_tekstowa, fallback PDF).
+
+    Liferay URLs mają format: /documents/53790/0/filename.docx/UUID
+    więc sprawdzamy .docx/.pdf wewnątrz URL, nie na końcu.
+    """
+    soup = _get_session_soup(session)
+    pdf_url = None
+    docx_url = None
+
+    for a in soup.find_all("a", href=True):
+        href = a["href"].lower()
+        link_text = a.get_text(strip=True).lower()
+        # Szukaj zarówno w href jak i w tekście linku
+        is_transcript = ("transkrypcja" in href or "stenogram" in href or
+                         "transkrypcja" in link_text or "stenogram" in link_text)
+        if not is_transcript:
+            continue
+        full = _normalize_href(a["href"])
+        # Liferay: .docx/.pdf może być w środku URL (nie na końcu)
+        has_docx = ".docx" in href
+        has_pdf = ".pdf" in href
+        # Preferuj DOCX wersja_tekstowa
+        if has_docx and "wersja_tekstowa" in href:
+            return full
+        # Następny: DOCX zanonimizowana
+        if has_docx and docx_url is None:
+            docx_url = full
+        # PDF jako ostatni fallback
+        if has_pdf and pdf_url is None:
+            pdf_url = full
+
+    return docx_url or pdf_url
 
 
 def download_docx(url: str, dest: Path) -> bool:
@@ -221,6 +268,35 @@ def download_docx(url: str, dest: Path) -> bool:
     except Exception as e:
         print(f"    BŁĄD pobierania docx: {e}")
         return False
+
+
+def process_session_transcript(session: dict, transcript_dir: Path) -> list[dict]:
+    """Pobierz i sparsuj transkrypcję stenogramu sesji."""
+    from parse_stenogram import parse_transcript
+
+    url = find_transcript_url(session)
+    if not url:
+        return []
+
+    ext = ".docx" if url.lower().endswith(".docx") else ".pdf"
+    filename = f"stenogram_{session['number']}_{session['date']}{ext}"
+    path = transcript_dir / filename
+
+    if not path.exists():
+        print(f"    Transkrypcja: {url.split('/')[-1][:60]}")
+        if not download_docx(url, path):
+            return []
+    else:
+        print(f"    Transkrypcja cached: {path.name}")
+
+    try:
+        speakers = parse_transcript(str(path))
+        total_words = sum(s["words"] for s in speakers)
+        print(f"    Stenogram: {len(speakers)} mówców, {total_words} słów")
+        return speakers
+    except Exception as e:
+        print(f"    BŁĄD parsowania stenogramu: {e}")
+        return []
 
 
 def process_session_docx(session: dict, docx_dir: Path) -> list[dict]:
@@ -496,12 +572,57 @@ def assign_kadencja(session_date: str) -> str | None:
     return None
 
 
-def build_kadencja_output(kid: str, sessions: list[dict], all_votes: list[dict], profiles: dict) -> dict:
+def build_kadencja_output(kid: str, sessions: list[dict], all_votes: list[dict],
+                          profiles: dict, session_speakers: dict[str, list] = None) -> dict:
     """Zbuduj output jednej kadencji."""
     kinfo = KADENCJE[kid]
+    session_speakers = session_speakers or {}
 
     councilors = build_councilors(all_votes, sessions, profiles)
     sessions_data = build_sessions(sessions, all_votes)
+
+    # Dodaj speakers do sesji i zbuduj activity per radny
+    councilor_names = {c["name"] for c in councilors}
+    councilor_activity: dict[str, dict] = {}  # name -> {sessions: [...], total_statements, total_words}
+
+    for sd in sessions_data:
+        sp = session_speakers.get(sd["date"], [])
+        sd["speakers"] = sp
+
+        # Zbierz aktywność radnych (tylko znanych radnych)
+        for s in sp:
+            if s["name"] not in councilor_names:
+                continue
+            if s["name"] not in councilor_activity:
+                councilor_activity[s["name"]] = {"sessions": [], "total_statements": 0, "total_words": 0}
+            act = councilor_activity[s["name"]]
+            act["sessions"].append({
+                "date": sd["date"],
+                "session": sd.get("number", ""),
+                "statements": s["statements"],
+                "words": s["words"],
+            })
+            act["total_statements"] += s["statements"]
+            act["total_words"] += s["words"]
+
+    # Dodaj activity do councilors
+    for c in councilors:
+        act = councilor_activity.get(c["name"])
+        if act:
+            sessions_spoke = len(act["sessions"])
+            c["has_activity_data"] = True
+            c["activity"] = {
+                "sessions_spoke": sessions_spoke,
+                "total_statements": act["total_statements"],
+                "total_words": act["total_words"],
+                "avg_statements_per_session": round(act["total_statements"] / sessions_spoke, 1),
+                "avg_words_per_session": round(act["total_words"] / sessions_spoke),
+                "sessions": act["sessions"],
+            }
+        else:
+            c["has_activity_data"] = bool(session_speakers)  # True jeśli mamy dane ale radny nie mówił
+            c["activity"] = None
+
     sim_top, sim_bottom = compute_similarity(all_votes, councilors)
 
     club_counts = defaultdict(int)
@@ -526,6 +647,53 @@ def build_kadencja_output(kid: str, sessions: list[dict], all_votes: list[dict],
     }
 
 
+def merge_stats_to_profiles(profiles_path: str, output: dict):
+    """Merge voting + activity stats from data.json councilors into profiles.json.
+
+    Template reads profile data from profiles.json, so stats must be there.
+    """
+    path = Path(profiles_path)
+    if not path.exists():
+        print("  Pominięto merge — brak profiles.json")
+        return
+
+    with open(path, encoding="utf-8") as f:
+        profiles = json.load(f)
+
+    # Build lookup: (kadencja_id, name) -> councilor stats
+    stats: dict[tuple[str, str], dict] = {}
+    for kad in output["kadencje"]:
+        kid = kad["id"]
+        for c in kad["councilors"]:
+            stats[(kid, c["name"])] = c
+
+    updated = 0
+    for p in profiles.get("profiles", []):
+        for kid, entry in p.get("kadencje", {}).items():
+            c = stats.get((kid, p["name"]))
+            if not c:
+                continue
+            # Merge voting stats
+            for key in ["frekwencja", "aktywnosc", "zgodnosc_z_klubem",
+                        "votes_za", "votes_przeciw", "votes_wstrzymal",
+                        "votes_brak", "votes_nieobecny", "votes_total",
+                        "rebellion_count", "rebellions"]:
+                if key in c:
+                    entry[key] = c[key]
+            entry["has_voting_data"] = True
+            # Merge activity stats
+            entry["has_activity_data"] = c.get("has_activity_data", False)
+            if c.get("activity"):
+                entry["activity"] = c["activity"]
+            elif "activity" in entry:
+                del entry["activity"]
+            updated += 1
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(profiles, f, ensure_ascii=False, indent=2)
+    print(f"  Zaktualizowano profiles.json: {updated} wpisów")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Scraper Rady Miasta Warszawy (BIP)")
     parser.add_argument("--kadencja", default="2024-2029",
@@ -538,6 +706,8 @@ def main():
     parser.add_argument("--explore", action="store_true", help="Pobierz 1 sesję i pokaż strukturę HTML")
     parser.add_argument("--profiles", default="docs/profiles.json", help="Plik profiles.json z klubami")
     parser.add_argument("--headed", action="store_true", help="Pokaż okno przeglądarki (debug)")
+    parser.add_argument("--only-transcripts", action="store_true",
+                        help="Tylko transkrypcje — pomiń głosowania, użyj istniejącego data.json")
     args = parser.parse_args()
 
     global DELAY
@@ -591,21 +761,79 @@ def main():
                     print(f"  {text:<100} -> {href}")
             return
 
-        # 2+3. Pobierz docx z wynikami głosowań i sparsuj
-        docx_dir = Path(args.output).parent / "docx_cache"
-        docx_dir.mkdir(parents=True, exist_ok=True)
+        # 2. Pobierz głosowania (lub załaduj z istniejącego data.json)
+        out_path = Path(args.output)
+        if args.only_transcripts:
+            # Załaduj głosowania z istniejącego data.json
+            if not out_path.exists():
+                print(f"BŁĄD: --only-transcripts wymaga istniejącego {args.output}")
+                sys.exit(1)
+            print(f"\n[1/2] Ładowanie głosowań z {args.output}...")
+            with open(out_path, encoding="utf-8") as f:
+                existing = json.load(f)
+            all_votes = []
+            for kad in existing["kadencje"]:
+                all_votes.extend(kad["votes"])
+            print(f"  Załadowano {len(all_votes)} głosowań")
+        else:
+            docx_dir = out_path.parent / "docx_cache"
+            docx_dir.mkdir(parents=True, exist_ok=True)
 
-        print(f"\n[2/3] Pobieranie i parsowanie wyników głosowań...")
-        all_votes = []
+            print(f"\n[2/4] Pobieranie i parsowanie wyników głosowań...")
+            all_votes = []
+            for session in all_sessions:
+                votes = process_session_docx(session, docx_dir)
+                all_votes.extend(votes)
+
+            print(f"  Razem: {len(all_votes)} głosowań z {len(all_sessions)} sesji")
+
+            if not all_votes:
+                print("UWAGA: Nie znaleziono głosowań. Użyj --explore żeby zbadać strukturę strony sesji.")
+                sys.exit(1)
+
+        # 3. Pobierz transkrypcje stenogramów
+        transcript_dir = Path(args.output).parent / "transcript_cache"
+        transcript_dir.mkdir(parents=True, exist_ok=True)
+
+        step = "[2/2]" if args.only_transcripts else "[3/4]"
+        print(f"\n{step} Pobieranie transkrypcji stenogramów...")
+        session_speakers: dict[str, list[dict]] = {}  # session_date -> speakers
+        # Debug: sprawdź pierwszą sesję pod kątem transkrypcji
+        if all_sessions:
+            s0 = all_sessions[0]
+            soup0 = _get_session_soup(s0)
+            all_a = soup0.find_all("a", href=True)
+            all_links = [(a["href"], a.get_text(strip=True)[:80]) for a in all_a]
+            transcript_links = [(h, t) for h, t in all_links
+                                if "transkrypcja" in h.lower() or "stenogram" in h.lower()
+                                or "transkrypcja" in t.lower() or "stenogram" in t.lower()]
+            # Liferay: .docx/.pdf w środku URL, nie na końcu
+            doc_links = [(h, t) for h, t in all_links
+                         if any(ext in h.lower() for ext in [".docx", ".pdf", ".xlsx"])]
+            print(f"  Debug sesja {s0['number']}: {len(all_links)} linków, {len(doc_links)} docs, {len(transcript_links)} transkrypcji")
+            if transcript_links:
+                for href, text in transcript_links[:10]:
+                    print(f"    transkrypcja: [{text[:60]}] -> {href[-100:]}")
+            if doc_links:
+                for href, text in doc_links[:10]:
+                    print(f"    doc: [{text[:60]}] -> {href[-100:]}")
+            # Szukaj sekcji z protokołami
+            proto_links = [(h, t) for h, t in all_links
+                           if any(kw in t.lower() for kw in ["protokół", "protokol", "dodatkowe", "transkryp", "steno"])]
+            if proto_links:
+                print(f"    Linki protokół/dodatkowe ({len(proto_links)}):")
+                for href, text in proto_links[:10]:
+                    print(f"      [{text[:60]}] -> {href[-100:]}")
+            if not transcript_links and not doc_links:
+                print(f"    UWAGA: Brak linków do dokumentów i transkrypcji!")
+                print(f"    Pierwsze 10 linków na stronie:")
+                for href, text in all_links[:10]:
+                    print(f"      [{text[:60]}] -> {href[-80:]}")
         for session in all_sessions:
-            votes = process_session_docx(session, docx_dir)
-            all_votes.extend(votes)
-
-        print(f"  Razem: {len(all_votes)} głosowań z {len(all_sessions)} sesji")
-
-        if not all_votes:
-            print("UWAGA: Nie znaleziono głosowań. Użyj --explore żeby zbadać strukturę strony sesji.")
-            sys.exit(1)
+            speakers = process_session_transcript(session, transcript_dir)
+            if speakers:
+                session_speakers[session["date"]] = speakers
+        print(f"  Transkrypcje: {len(session_speakers)}/{len(all_sessions)} sesji")
 
         # 4. Buduj output per kadencja
         print(f"\n[4/4] Budowanie pliku wyjściowego...")
@@ -613,16 +841,17 @@ def main():
         if profiles:
             print(f"  Załadowano profile: {len(profiles)} radnych")
 
-        # Grupuj sesje i głosowania per kadencja
+        # Grupuj sesje i głosowania per kadencja (sortuj od najstarszej)
         kadencje_output = []
-        for kid in target_kadencje:
+        target_kadencje_sorted = sorted(target_kadencje, key=lambda k: KADENCJE[k]["start"])
+        for kid in target_kadencje_sorted:
             kinfo = KADENCJE[kid]
             k_sessions = [s for s in all_sessions if assign_kadencja(s["date"]) == kid]
             k_votes = [v for v in all_votes if assign_kadencja(v["session_date"]) == kid]
             if not k_votes:
                 print(f"  Kadencja {kid}: brak głosowań — pomijam")
                 continue
-            kad_out = build_kadencja_output(kid, k_sessions, k_votes, profiles)
+            kad_out = build_kadencja_output(kid, k_sessions, k_votes, profiles, session_speakers)
             kadencje_output.append(kad_out)
 
         default_kid = target_kadencje[0]
@@ -642,6 +871,9 @@ def main():
             total_v = len(kad["votes"])
             named_v = sum(1 for v in kad["votes"] if sum(len(nv) for nv in v["named_votes"].values()) > 0)
             print(f"  {kad['id']}: {len(kad['sessions'])} sesji, {total_v} głosowań ({named_v} z wynikami imiennymi), {len(kad['councilors'])} radnych")
+
+        # Merge voting + activity stats into profiles.json
+        merge_stats_to_profiles(args.profiles, output)
 
     finally:
         close_browser()
