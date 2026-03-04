@@ -538,14 +538,32 @@ def compute_similarity(all_votes: list[dict], councilors_list: list[dict]) -> tu
 
 def build_sessions(sessions_raw: list[dict], all_votes: list[dict]) -> list[dict]:
     """Zbuduj dane sesji."""
-    votes_by_session = defaultdict(list)
+    # Group votes by (date, session_number) to handle multiple sessions on same day
+    votes_by_key: dict[tuple[str, str], list] = defaultdict(list)
     for v in all_votes:
-        votes_by_session[v["session_date"]].append(v)
+        key = (v["session_date"], v.get("session_number", ""))
+        votes_by_key[key].append(v)
+
+    # Also keep a fallback by date only (for sessions with no matching session_number)
+    votes_by_date: dict[str, list] = defaultdict(list)
+    for v in all_votes:
+        votes_by_date[v["session_date"]].append(v)
+
+    # Check which dates have multiple sessions
+    from collections import Counter
+    date_counts = Counter(s["date"] for s in sessions_raw)
 
     result = []
     for s in sessions_raw:
         date = s["date"]
-        session_votes = votes_by_session.get(date, [])
+        number = s.get("number", "")
+
+        if date_counts[date] > 1:
+            # Multiple sessions on same day — match by session_number
+            session_votes = votes_by_key.get((date, number), [])
+        else:
+            # Single session on this day — take all votes for that date
+            session_votes = votes_by_date.get(date, [])
 
         attendees = set()
         for v in session_votes:
@@ -554,13 +572,13 @@ def build_sessions(sessions_raw: list[dict], all_votes: list[dict]) -> list[dict
 
         result.append({
             "date": date,
-            "number": s["number"],
+            "number": number,
             "vote_count": len(session_votes),
             "attendee_count": len(attendees),
             "attendees": sorted(attendees),
         })
 
-    return sorted(result, key=lambda x: x["date"])
+    return sorted(result, key=lambda x: (x["date"], x["number"]))
 
 
 def assign_kadencja(session_date: str) -> str | None:
