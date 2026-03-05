@@ -1496,8 +1496,7 @@ function renderBudget() {
       <canvas id="budget-trend-chart"></canvas>
     </div>
     <div style="color:var(--muted);font-size:0.8rem;margin-top:16px">
-      Źródło: BIP Warszawa, dokumenty budżetowe. Dane 2015–2021 mają charakter szacunkowy (pokrycie ~60–83%).
-      Dane 2022–${latestYear} na podstawie uchwalonych budżetów.
+      Źródło: BIP m.st. Warszawy, Kompendium budżetowe ${years[0]}–${latestYear}. Dane na podstawie uchwalonych budżetów (2020 r. – projekt budżetu).
     </div>`;
   container.innerHTML = html;
 
@@ -1533,7 +1532,7 @@ function renderBudget() {
       </div>`;
       if (totals.estimated) {
         dhtml += `<div style="background:rgba(202,138,4,0.08);border:1px solid rgba(202,138,4,0.25);border-radius:8px;padding:12px 16px;margin-top:-8px;margin-bottom:16px;font-size:0.85rem;color:var(--text)">
-          <strong style="color:var(--yellow)">⚠ Dane niepełne</strong> — budżet za ${year} rok oparty jest na częściowo dostępnych dokumentach (pokrycie ~${totals.coverage_percentage || '60–83'}%). </div>`;
+          <strong style="color:var(--yellow)">⚠ Projekt budżetu</strong> — dane za ${year} rok na podstawie projektu budżetu (przed uchwaleniem przez Radę m.st. Warszawy).</div>`;
       }
     }
 
@@ -1568,33 +1567,34 @@ function renderBudget() {
 
     // Budget votes for this year
     if (votes.length > 0) {
-      const uchwalenie = votes.filter(v => /uchwaleni[aeu]\s+budżet/i.test(v.topic) && !/zmian|poprawka/i.test(v.topic));
-      const poprawki = votes.filter(v => /poprawka/i.test(v.topic));
-      const zmiany = votes.filter(v => /zmienij?ąca.*budżet/i.test(v.topic));
-      const inne = votes.filter(v => !uchwalenie.includes(v) && !poprawki.includes(v) && !zmiany.includes(v));
+      const uchwalenie = votes.filter(v => /w sprawie budżetu/i.test(v.topic) && !/zmian|poprawka|absolutorium|sprawozdani/i.test(v.topic));
+      const wpf = votes.filter(v => /wieloletni.*prognoz/i.test(v.topic) && !uchwalenie.includes(v));
+      const poprawki = votes.filter(v => /poprawka|poprawki/i.test(v.topic));
+      const absolutorium = votes.filter(v => /absolutorium|sprawozdani.*wykonani/i.test(v.topic));
+      const inne = votes.filter(v => !uchwalenie.includes(v) && !wpf.includes(v) && !poprawki.includes(v) && !absolutorium.includes(v));
 
       const renderVoteRow = (v) => {
-        const passed = v.za > (v.za + v.przeciw) / 2;
+        const passed = v.za > v.przeciw;
         return `<tr class="vote-row" onclick="showVote('${v.id}')">
           <td style="width:80px;font-size:0.8rem;color:var(--muted)">${v.date}</td>
-          <td style="text-align:left;font-size:0.85rem">${v.topic.length > 120 ? v.topic.substring(0,120)+'…' : v.topic}</td>
+          <td style="text-align:left;font-size:0.85rem">${v.topic.length > 140 ? v.topic.substring(0,140)+'…' : v.topic}</td>
           <td style="width:50px"><span class="pill pill-za">${v.za}</span></td>
           <td style="width:50px">${v.przeciw ? `<span class="pill pill-przeciw">${v.przeciw}</span>` : '0'}</td>
           <td style="width:70px;font-size:0.8rem;font-weight:600;color:${passed?'var(--green)':'var(--red)'}">${passed?'Przyjęte':'Odrzucone'}</td>
         </tr>`;
       };
 
+      const renderGroup = (label, items) => {
+        if (!items.length) return '';
+        return `<tr><td colspan="5" style="font-size:0.8rem;color:var(--muted);padding:4px 12px;font-weight:600">${label} (${items.length})</td></tr>` + items.map(renderVoteRow).join('');
+      };
+
       dhtml += `<h2>Głosowania budżetowe (${votes.length})</h2><table><tbody>`;
-      if (uchwalenie.length) dhtml += uchwalenie.map(renderVoteRow).join('');
-      if (poprawki.length) {
-        dhtml += `<tr><td colspan="5" style="font-size:0.8rem;color:var(--muted);padding:4px 12px">Poprawki (${poprawki.length})</td></tr>`;
-        dhtml += poprawki.map(renderVoteRow).join('');
-      }
-      if (zmiany.length) {
-        dhtml += `<tr><td colspan="5" style="font-size:0.8rem;color:var(--muted);padding:4px 12px">Zmiany w trakcie roku (${zmiany.length})</td></tr>`;
-        dhtml += zmiany.map(renderVoteRow).join('');
-      }
-      if (inne.length) dhtml += inne.map(renderVoteRow).join('');
+      if (uchwalenie.length) dhtml += renderGroup('Uchwalenie budżetu', uchwalenie);
+      if (wpf.length) dhtml += renderGroup('Wieloletnia Prognoza Finansowa', wpf);
+      if (poprawki.length) dhtml += renderGroup('Poprawki', poprawki);
+      if (absolutorium.length) dhtml += renderGroup('Sprawozdanie i absolutorium', absolutorium);
+      if (inne.length) dhtml += renderGroup('Inne', inne);
       dhtml += `</tbody></table>`;
     }
 

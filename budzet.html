@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budżet m.st. Warszawy 2020–2026 — Radoskop</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f8f9fa; --surface: #ffffff; --border: #e2e5e9;
+  --text: #1a1d27; --muted: #6b7280; --accent: #4f46e5;
+  --green: #16a34a; --red: #dc2626; --yellow: #ca8a04;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+.container { max-width:1100px; margin:0 auto; padding:20px; }
+header { padding:30px 0 16px; border-bottom:1px solid var(--border); margin-bottom:24px; }
+header h1 { font-size:1.8rem; font-weight:700; }
+header h1 span { color:var(--accent); }
+header p { color:var(--muted); margin-top:4px; font-size:0.9rem; }
+.kadencja-bar { display:flex; gap:4px; flex-wrap:wrap; }
+.kadencja-btn { padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-size:0.85rem; font-weight:500; }
+.kadencja-btn.active { background:var(--accent); color:white; border-color:var(--accent); }
+.profile-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+.metric-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; }
+.metric-value { font-weight:700; }
+.metric-label { font-size:0.8rem; color:var(--muted); margin-top:4px; }
+h2 { font-size:1.2rem; font-weight:600; margin:24px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+td { padding:8px 12px; border-bottom:1px solid var(--border); }
+tr:hover td { background:rgba(99,102,241,0.04); }
+.bar { height:6px; border-radius:3px; background:var(--border); position:relative; min-width:60px; }
+.bar-fill { height:100%; border-radius:3px; position:absolute; left:0; top:0; }
+.chart-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; }
+.pill { display:inline-block; padding:1px 6px; border-radius:3px; font-size:0.75rem; margin:1px; }
+.pill-za { background:rgba(34,197,94,0.15); color:var(--green); }
+.pill-przeciw { background:rgba(239,68,68,0.15); color:var(--red); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Rado<span>skop</span> Warszawa — Budżet</h1>
+    <p>Dochody, wydatki i struktura budżetu m.st. Warszawy na podstawie kompendium budżetowego 2020–2026</p>
+  </header>
+  <div id="budget-content"></div>
+</div>
+<script>
+const BUDGET = {"totals": [{"year": 2020, "revenue": 18190537400, "expenditure": 19927615037, "deficit": 1737077637, "estimated": true}, {"year": 2021, "revenue": 20565585317, "expenditure": 21630383949, "deficit": 1064798632, "estimated": false}, {"year": 2022, "revenue": 19210473329, "expenditure": 21418901348, "deficit": 2208428019, "estimated": false}, {"year": 2023, "revenue": 20217519655, "expenditure": 24368315717, "deficit": 4150796062, "estimated": false}, {"year": 2024, "revenue": 24519147551, "expenditure": 27774514119, "deficit": 3255366568, "estimated": false}, {"year": 2025, "revenue": 26279526428, "expenditure": 29476647595, "deficit": 3197121167, "estimated": false}, {"year": 2026, "revenue": 28497182679, "expenditure": 32196334186, "deficit": 3699151507, "estimated": false}], "categories": {"2020": [{"name": "Transport", "amount": 4984113019}, {"name": "Edukacja", "amount": 4326562879}, {"name": "Różne rozliczenia", "amount": 1662369436}, {"name": "Administracja", "amount": 1474895794}, {"name": "Rodzina", "amount": 1468173112}, {"name": "Gospodarka komunalna", "amount": 1418977677}, {"name": "Gospodarka mieszkaniowa", "amount": 1268691687}, {"name": "Kultura", "amount": 656951712}, {"name": "Pomoc społeczna", "amount": 587474165}, {"name": "Opieka wychowawcza", "amount": 494364958}, {"name": "Inne", "amount": 1591675585}], "2021": [{"name": "Transport", "amount": 5175724043}, {"name": "Edukacja", "amount": 4506975120}, {"name": "Rodzina", "amount": 2753247281}, {"name": "Gospodarka komunalna", "amount": 1718656906}, {"name": "Różne rozliczenia", "amount": 1533609196}, {"name": "Administracja", "amount": 1506201061}, {"name": "Gospodarka mieszkaniowa", "amount": 1181185715}, {"name": "Kultura", "amount": 651795801}, {"name": "Pomoc społeczna", "amount": 636865531}, {"name": "Opieka wychowawcza", "amount": 524154367}, {"name": "Inne", "amount": 1449186411}], "2022": [{"name": "Transport", "amount": 5266440688}, {"name": "Edukacja", "amount": 4975872168}, {"name": "Gospodarka komunalna", "amount": 1804513886}, {"name": "Różne rozliczenia", "amount": 1739834036}, {"name": "Administracja", "amount": 1617121734}, {"name": "Rodzina", "amount": 1592319217}, {"name": "Gospodarka mieszkaniowa", "amount": 1170131438}, {"name": "Pomoc społeczna", "amount": 749382475}, {"name": "Kultura", "amount": 733586852}, {"name": "Ochrona zdrowia", "amount": 358054652}, {"name": "Inne", "amount": 1419697163}], "2023": [{"name": "Transport", "amount": 6516227845}, {"name": "Edukacja", "amount": 5850160539}, {"name": "Różne rozliczenia", "amount": 2189677272}, {"name": "Administracja", "amount": 1864645155}, {"name": "Gospodarka komunalna", "amount": 1819044705}, {"name": "Gospodarka mieszkaniowa", "amount": 1442033119}, {"name": "Rodzina", "amount": 866340080}, {"name": "Kultura", "amount": 847099336}, {"name": "Pomoc społeczna", "amount": 842225450}, {"name": "Opieka wychowawcza", "amount": 417712201}, {"name": "Inne", "amount": 1721687776}], "2024": [{"name": "Edukacja", "amount": 6941670842}, {"name": "Transport", "amount": 6612666343}, {"name": "Różne rozliczenia", "amount": 3253226723}, {"name": "Administracja", "amount": 2148541668}, {"name": "Gospodarka komunalna", "amount": 1955427313}, {"name": "Gospodarka mieszkaniowa", "amount": 1582358123}, {"name": "Pomoc społeczna", "amount": 1004724677}, {"name": "Kultura", "amount": 999377831}, {"name": "Rodzina", "amount": 939159754}, {"name": "Opieka wychowawcza", "amount": 486146630}, {"name": "Inne", "amount": 1851214215}], "2025": [{"name": "Edukacja", "amount": 8280246422}, {"name": "Transport", "amount": 7311342439}, {"name": "Administracja", "amount": 2477024819}, {"name": "Gospodarka komunalna", "amount": 1954038438}, {"name": "Gospodarka mieszkaniowa", "amount": 1901032056}, {"name": "Różne rozliczenia", "amount": 1415183676}, {"name": "Pomoc społeczna", "amount": 1161494137}, {"name": "Kultura", "amount": 1123923236}, {"name": "Rodzina", "amount": 1063719462}, {"name": "Opieka wychowawcza", "amount": 602183219}, {"name": "Inne", "amount": 2186459691}], "2026": [{"name": "Edukacja", "amount": 9395740736}, {"name": "Transport", "amount": 8056776551}, {"name": "Administracja", "amount": 2775661917}, {"name": "Gospodarka mieszkaniowa", "amount": 2083652788}, {"name": "Gospodarka komunalna", "amount": 2016016335}, {"name": "Pomoc społeczna", "amount": 1269488762}, {"name": "Różne rozliczenia", "amount": 1144207000}, {"name": "Kultura", "amount": 1138752807}, {"name": "Rodzina", "amount": 1081371440}, {"name": "Opieka wychowawcza", "amount": 708194594}, {"name": "Inne", "amount": 2526471256}]}, "votes": {"2023": [{"id": "2022-12-15_005", "topic": "Uchwała Nr LXXIV/2454/2022 Rady m.st. Warszawy w sprawie Wieloletniej Prognozy Finansowej miasta stołecznego Warszawy na lata 2023-2050 – druk nr 2623 wraz z autopoprawkami", "date": "2022-12-15", "za": 0, "przeciw": 13}, {"id": "2022-12-15_006", "topic": "Uchwała Nr LXXIV/2455/2022 Rady m.st. Warszawy w sprawie budżetu miasta stołecznego Warszawy na 2023 rok – druk nr 2624 wraz z autopoprawkami", "date": "2022-12-15", "za": 0, "przeciw": 14}, {"id": "2023-05-25_006", "topic": "Uchwała Nr LXXXI/2656/2023 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2023-2050 – druk nr 2948 wraz z autopoprawkami", "date": "2023-05-25", "za": 36, "przeciw": 0}, {"id": "2023-12-14_001", "topic": "Uchwała Nr XCII/3012/2023 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2023-2050 – druk nr 3302 wraz z autopoprawkami", "date": "2023-12-14", "za": 35, "przeciw": 0}, {"id": "2024-06-20_010", "topic": "Uchwała Nr VI/111/2024 Rady m.st. Warszawy w sprawie zatwierdzenia sprawozdania finansowego m.st. Warszawy wraz ze sprawozdaniem z wykonania budżetu m.st. Warszawy za 2023 rok – druk nr 100", "date": "2024-06-20", "za": 35, "przeciw": 13}, {"id": "2024-06-20_011", "topic": "Uchwała Nr VI/112/2024 Rady m.st. Warszawy w sprawie udzielenia Prezydentowi m.st. Warszawy absolutorium z tytułu wykonania budżetu za 2023 rok – druk nr 101", "date": "2024-06-20", "za": 35, "przeciw": 14}], "2024": [{"id": "2023-12-14_005", "topic": "Uchwała Nr XCII/3016/2023 Rady m.st. Warszawy w sprawie Wieloletniej Prognozy Finansowej miasta stołecznego Warszawy na lata 2024-2050 - druk nr 3248 wraz z autopoprawkami", "date": "2023-12-14", "za": 35, "przeciw": 12}, {"id": "2023-12-14_006", "topic": "Uchwała Nr XCII/3017/2023 Rady m.st. Warszawy w sprawie budżetu miasta stołecznego Warszawy na 2024 rok - druk nr 3249 wraz z autopoprawkami", "date": "2023-12-14", "za": 33, "przeciw": 14}, {"id": "2024-08-29_022", "topic": "Uchwała Nr IX/196/2024 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2024-2055 – druk nr 242 wraz z autopoprawkami", "date": "2024-08-29", "za": 39, "przeciw": 0}, {"id": "2024-09-19_014", "topic": "Uchwała Nr X/302/2024 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej Miasta Stołecznego Warszawy na lata 2024-2055 – druk nr 328", "date": "2024-09-19", "za": 60, "przeciw": 0}, {"id": "2024-10-17_028", "topic": "Uchwała Nr XI/339/2024 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej Miasta Stołecznego Warszawy na lata 2024-2055 – druk nr 346 wraz z autopoprawkami", "date": "2024-10-17", "za": 49, "przeciw": 0}, {"id": "2024-11-28_014", "topic": "Uchwała Nr XII/384/2024 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej Miasta Stołecznego Warszawy na lata 2024-2055 – druk nr 433 wraz z autopoprawkami", "date": "2024-11-28", "za": 41, "przeciw": 0}, {"id": "2025-06-26_013", "topic": "Uchwała Nr XXII/872/2025 Rady m.st. Warszawy w sprawie zatwierdzenia sprawozdania finansowego m.st. Warszawy wraz ze sprawozdaniem z wykonania budżetu m.st. Warszawy za 2024 rok – druk nr 928", "date": "2025-06-26", "za": 39, "przeciw": 13}, {"id": "2025-06-26_014", "topic": "Uchwała Nr XXII/873/2025 Rady m.st. Warszawy w sprawie udzielenia Prezydentowi m.st. Warszawy absolutorium z tytułu wykonania budżetu za 2024 rok – druk nr 929", "date": "2025-06-26", "za": 37, "przeciw": 13}], "2022": [{"id": "2022-03-17_002", "topic": "Uchwała Nr LXII/1982/2022 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2022-2050 – druk nr 2195 + autopoprawki", "date": "2022-03-17", "za": 41, "przeciw": 0}, {"id": "2022-12-15_003", "topic": "Uchwała Nr LXXIV/2452/2022 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2022-2050 – druk nr 2708 wraz z autopoprawką", "date": "2022-12-15", "za": 38, "przeciw": 0}], "2021": [{"id": "2021-03-18_003", "topic": "Uchwała Nr XLVI/1401/2021 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2021-2050 – druk nr 1488 + autopoprawki", "date": "2021-03-18", "za": 45, "przeciw": 0}, {"id": "2021-05-13_002", "topic": "Uchwała Nr XLVIII/1479/2021 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2021-2050 – druk nr 1590 + A,B", "date": "2021-05-13", "za": 45, "przeciw": 0}, {"id": "2021-06-24_005", "topic": "Uchwała Nr L/1555/2021 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2021-2050 – druk nr 1689 wraz z autopoprawkami", "date": "2021-06-24", "za": 41, "przeciw": 0}, {"id": "2021-07-08_001", "topic": "Uchwała Nr LI/1561/2021 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej Miasta Stołecznego Warszawy na lata 2021-2050 – druk nr 1762", "date": "2021-07-08", "za": 50, "przeciw": 1}, {"id": "2021-08-26_003", "topic": "Uchwała Nr LIII/1608/2021 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2021-2050 – druk nr 1796 + A, B, C", "date": "2021-08-26", "za": 42, "przeciw": 0}, {"id": "2021-10-14_003", "topic": "Uchwała Nr LV/1694/2021 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2021-2050 – druk nr 1881 + A, B", "date": "2021-10-14", "za": 39, "przeciw": 7}], "2020": [{"id": "2021-06-24_002", "topic": "Uchwała Nr L/1552/2021 Rady m.st. Warszawy w sprawie zatwierdzenia sprawozdania finansowego m.st. Warszawy wraz ze sprawozdaniem z wykonania budżetu m.st. Warszawy za 2020 rok – druk nr 1706", "date": "2021-06-24", "za": 41, "przeciw": 17}, {"id": "2021-06-24_003", "topic": "Uchwała Nr L/1553/2021  Rady m.st. Warszawy w sprawie udzielenia Prezydentowi m.st. Warszawy absolutorium z tytułu wykonania budżetu za 2020 rok – druk nr 1707", "date": "2021-06-24", "za": 40, "przeciw": 17}], "2026": [{"id": "2025-12-11_046", "topic": "Uchwała Nr XXX/1138/2025 Rady m.st. Warszawy w sprawie Wieloletniej Prognozy Finansowej Miasta Stołecznego Warszawy na lata 2026-2055 – druk nr 1148 wraz z autopoprawkami", "date": "2025-12-11", "za": 36, "przeciw": 16}, {"id": "2025-12-11_047", "topic": "głosowanie poprawki Komisji Budżetu i Finansów (dot. zmiany w załączniku Bielany)", "date": "2025-12-11", "za": 23, "przeciw": 37}, {"id": "2025-12-11_122", "topic": "Uchwała Nr XXX/1139/2025 Rady m.st. Warszawy w sprawie budżetu miasta stołecznego Warszawy na 2026 rok – druk nr 1149 wraz z autopoprawkami", "date": "2025-12-11", "za": 37, "przeciw": 16}], "2025": [{"id": "2025-03-13_007", "topic": "Uchwała Nr XVI/649/2025 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej Miasta Stołecznego Warszawy na lata 2025-2055 – druk nr 688 wraz z autopoprawkami", "date": "2025-03-13", "za": 38, "przeciw": 0}, {"id": "2025-06-05_004", "topic": "Uchwała Nr XXI/806/2025 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej Miasta Stołecznego Warszawy na lata 2025-2055 – druk nr 815 wraz z autopoprawkami", "date": "2025-06-05", "za": 43, "przeciw": 0}, {"id": "2025-06-26_010", "topic": "Uchwała Nr XXII/869/2025 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2025-2055 – druk nr 926 wraz z autopoprawkami", "date": "2025-06-26", "za": 41, "przeciw": 0}, {"id": "2025-08-28_018", "topic": "Uchwała Nr XXV/941/2025 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2025-2055 – druk nr 1027 + autopoprawki", "date": "2025-08-28", "za": 43, "przeciw": 0}, {"id": "2025-10-16_011", "topic": "Projekt uchwały Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2025-2055 – druk nr 1113 + A, B - poprawka zgłoszona przez radną M. Jałoszyńską", "date": "2025-10-16", "za": 8, "przeciw": 36}, {"id": "2025-10-16_012", "topic": "Uchwała Nr XXVIII/1031/2025 Rady m.st. Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2025-2055 – druk nr 1113 + autopoprawki", "date": "2025-10-16", "za": 39, "przeciw": 0}, {"id": "2025-12-11_123", "topic": "Uchwała Nr XXX/1140/2025 Rady Miasta Stołecznego Warszawy w sprawie zmian w Wieloletniej Prognozie Finansowej m.st. Warszawy na lata 2025-2055 – druk nr 1240 wraz z autopoprawką", "date": "2025-12-11", "za": 38, "przeciw": 16}]}};
+
+let budgetChartTrend = null, budgetChartCat = null;
+
+function renderBudget() {
+  const B = BUDGET;
+  const container = document.getElementById('budget-content');
+  const fmt = (n) => (n/1e9).toFixed(2).replace('.', ',') + ' mld';
+  const fmtM = (n) => n >= 1e9 ? fmt(n) : (n/1e6).toFixed(0) + ' mln';
+  const years = B.totals.map(t => t.year);
+  const latestYear = years[years.length - 1];
+
+  let html = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+      <span style="font-weight:600">Rok budżetowy:</span>
+      <div class="kadencja-bar" id="budget-year-bar">
+        ${years.map(y => `<button class="kadencja-btn ${y===latestYear?'active':''}" data-byear="${y}">${y}</button>`).join('')}
+      </div>
+    </div>
+    <div id="budget-year-detail"></div>
+    <h2 style="margin-top:32px">Dochody i wydatki ${years[0]}–${latestYear}</h2>
+    <div class="chart-wrap" style="max-width:800px;margin-bottom:16px">
+      <canvas id="budget-trend-chart"></canvas>
+    </div>
+    <div style="color:var(--muted);font-size:0.8rem;margin-top:16px">
+      Źródło: BIP m.st. Warszawy, Kompendium budżetowe ${years[0]}–${latestYear}. Dane na podstawie uchwalonych budżetów (2020 r. – projekt budżetu).
+    </div>`;
+  container.innerHTML = html;
+
+  function renderYearDetail(year) {
+    const yStr = String(year);
+    const totals = B.totals.find(t => t.year === year);
+    const cats = B.categories[yStr] || [];
+    const totalExp = cats.reduce((s, c) => s + c.amount, 0);
+    const prevCats = B.categories[String(year - 1)] || [];
+    const prevMap = {};
+    prevCats.forEach(c => { prevMap[c.name] = c.amount; });
+
+    let dhtml = '';
+
+    if (totals) {
+      const est = totals.estimated ? ' *' : '';
+      dhtml += `<div class="profile-metrics" style="margin-bottom:24px">
+        <div class="metric-card">
+          <div class="metric-value" style="color:var(--green);font-size:1.4rem">${fmt(totals.revenue)}</div>
+          <div class="metric-label">Dochody${est}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="font-size:1.4rem">${fmt(totals.expenditure)}</div>
+          <div class="metric-label">Wydatki${est}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value" style="color:var(--red);font-size:1.4rem">${fmt(totals.deficit)}</div>
+          <div class="metric-label">Deficyt${est}</div>
+        </div>
+      </div>`;
+      if (totals.estimated) {
+        dhtml += `<div style="background:rgba(202,138,4,0.08);border:1px solid rgba(202,138,4,0.25);border-radius:8px;padding:12px 16px;margin-top:-8px;margin-bottom:16px;font-size:0.85rem;color:var(--text)">
+          <strong style="color:var(--yellow)">⚠ Projekt budżetu</strong> — dane za ${year} rok na podstawie projektu budżetu (przed uchwaleniem przez Radę m.st. Warszawy).</div>`;
+      }
+    }
+
+    if (cats.length > 0) {
+      dhtml += `<h2>Struktura wydatków ${year}</h2>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px">
+          <div style="width:320px;flex-shrink:0">
+            <canvas id="budget-cat-chart"></canvas>
+          </div>
+          <div style="flex:1;min-width:280px">
+            <table><tbody>${cats.map(c => {
+              const pct = totalExp > 0 ? (c.amount / totalExp * 100).toFixed(1) : '0';
+              const prev = prevMap[c.name];
+              let changeHtml = '';
+              if (prev && prev > 0) {
+                const changePct = ((c.amount - prev) / prev * 100).toFixed(0);
+                const color = changePct > 0 ? 'var(--green)' : changePct < 0 ? 'var(--red)' : 'var(--muted)';
+                changeHtml = `<span style="color:${color};font-size:0.8rem;margin-left:6px">${changePct > 0 ? '+' : ''}${changePct}%</span>`;
+              }
+              return `<tr>
+                <td style="font-size:0.85rem">${c.name}</td>
+                <td style="font-size:0.85rem;text-align:right;white-space:nowrap">${fmtM(c.amount)} zł</td>
+                <td style="width:80px"><div class="bar"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div></td>
+                <td style="font-size:0.8rem;color:var(--muted);width:45px;text-align:right">${pct}%</td>
+                <td style="text-align:right">${changeHtml}</td>
+              </tr>`;
+            }).join('')}</tbody></table>
+          </div>
+        </div>`;
+    }
+
+    // Budget votes for this year
+    const votes = (B.votes || {})[yStr] || [];
+    if (votes.length > 0) {
+      const uchwalenie = votes.filter(v => /uchwaleni[aeu]\s+budżet|w sprawie budżetu/i.test(v.topic) && !/zmian|poprawka/i.test(v.topic));
+      const wpf = votes.filter(v => /wieloletni.*prognoz/i.test(v.topic) && !uchwalenie.includes(v));
+      const poprawki = votes.filter(v => /poprawka|poprawki/i.test(v.topic));
+      const absolutorium = votes.filter(v => /absolutorium|sprawozdani.*wykonani/i.test(v.topic));
+      const inne = votes.filter(v => !uchwalenie.includes(v) && !wpf.includes(v) && !poprawki.includes(v) && !absolutorium.includes(v));
+
+      const renderVoteRow = (v) => {
+        const passed = v.za > v.przeciw;
+        return `<tr>
+          <td style="width:80px;font-size:0.8rem;color:var(--muted)">${v.date}</td>
+          <td style="text-align:left;font-size:0.85rem">${v.topic.length > 140 ? v.topic.substring(0,140)+'…' : v.topic}</td>
+          <td style="width:50px"><span class="pill pill-za">${v.za}</span></td>
+          <td style="width:50px">${v.przeciw ? `<span class="pill pill-przeciw">${v.przeciw}</span>` : '0'}</td>
+          <td style="width:70px;font-size:0.8rem;font-weight:600;color:${passed?'var(--green)':'var(--red)'}">${passed?'Przyjęte':'Odrzucone'}</td>
+        </tr>`;
+      };
+
+      const renderGroup = (label, items) => {
+        if (!items.length) return '';
+        return `<tr><td colspan="5" style="font-size:0.8rem;color:var(--muted);padding:4px 12px;font-weight:600">${label} (${items.length})</td></tr>` + items.map(renderVoteRow).join('');
+      };
+
+      dhtml += `<h2>Głosowania budżetowe (${votes.length})</h2><table><tbody>`;
+      if (uchwalenie.length) dhtml += renderGroup('Uchwalenie budżetu', uchwalenie);
+      if (wpf.length) dhtml += renderGroup('Wieloletnia Prognoza Finansowa', wpf);
+      if (poprawki.length) dhtml += renderGroup('Poprawki', poprawki);
+      if (absolutorium.length) dhtml += renderGroup('Sprawozdanie i absolutorium', absolutorium);
+      if (inne.length) dhtml += renderGroup('Inne', inne);
+      dhtml += `</tbody></table>`;
+    }
+
+    document.getElementById('budget-year-detail').innerHTML = dhtml;
+
+    if (cats.length > 0) {
+      const top = cats.slice(0, 8);
+      const rest = cats.slice(8);
+      const restSum = rest.reduce((s, c) => s + c.amount, 0);
+      const labels = top.map(c => c.name);
+      const values = top.map(c => c.amount / 1e6);
+      if (restSum > 0) { labels.push('Pozostałe'); values.push(restSum / 1e6); }
+      const colors = ['#4f46e5','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#6b7280','#a3a3a3'];
+      if (budgetChartCat) budgetChartCat.destroy();
+      const catCtx = document.getElementById('budget-cat-chart');
+      if (catCtx) {
+        budgetChartCat = new Chart(catCtx.getContext('2d'), {
+          type: 'doughnut',
+          data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom', labels: { color: '#4b5563', padding: 10, font: { size: 11 } } },
+              tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed.toFixed(0)} mln PLN` } }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  document.querySelectorAll('#budget-year-bar .kadencja-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('#budget-year-bar .kadencja-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderYearDetail(Number(btn.dataset.byear));
+    };
+  });
+
+  renderYearDetail(latestYear);
+
+  if (budgetChartTrend) budgetChartTrend.destroy();
+  const trendCtx = document.getElementById('budget-trend-chart');
+  if (trendCtx) {
+    budgetChartTrend = new Chart(trendCtx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: B.totals.map(t => t.year),
+        datasets: [{
+          label: 'Dochody',
+          data: B.totals.map(t => t.revenue / 1e9),
+          borderColor: 'rgba(34,197,94,0.8)',
+          backgroundColor: 'rgba(34,197,94,0.1)',
+          fill: true, tension: 0.3, pointRadius: 4,
+        }, {
+          label: 'Wydatki',
+          data: B.totals.map(t => t.expenditure / 1e9),
+          borderColor: 'rgba(99,102,241,0.8)',
+          backgroundColor: 'rgba(99,102,241,0.1)',
+          fill: true, tension: 0.3, pointRadius: 4,
+        }, {
+          label: 'Deficyt',
+          data: B.totals.map(t => t.deficit / 1e9),
+          borderColor: 'rgba(239,68,68,0.7)',
+          backgroundColor: 'rgba(239,68,68,0.05)',
+          fill: true, tension: 0.3, pointRadius: 4, borderDash: [5, 3],
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { grid: { display: false } },
+          y: { title: { display: true, text: 'mld PLN', color: '#6b7280' }, ticks: { color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.06)' } }
+        },
+        plugins: { legend: { labels: { color: '#4b5563' } } }
+      }
+    });
+  }
+}
+
+renderBudget();
+</script>
+</body>
+</html>
