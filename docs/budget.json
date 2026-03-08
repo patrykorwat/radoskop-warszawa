@@ -660,28 +660,6 @@
           "name": "Inne",
           "amount": 100000000
         }
-      ],
-      "top_project": {
-        "name": "II linia metra — odcinek zachodni",
-        "amount": 839000000,
-        "category": "Metro"
-      },
-      "top_projects": [
-        {
-          "name": "II linia metra — odcinek zachodni",
-          "amount": 839000000,
-          "category": "Metro"
-        },
-        {
-          "name": "Drogi i infrastruktura drogowa",
-          "amount": 428000000,
-          "category": "Drogi"
-        },
-        {
-          "name": "Szkoły, przedszkola, żłobki",
-          "amount": 300000000,
-          "category": "Edukacja"
-        }
       ]
     },
     "2021": {
@@ -716,26 +694,26 @@
           "amount": 150000000
         }
       ],
-      "top_project": {
-        "name": "II linia metra — odcinek zachodni",
-        "amount": 640000000,
-        "category": "Metro"
-      },
       "top_projects": [
         {
-          "name": "II linia metra — odcinek zachodni",
-          "amount": 640000000,
-          "category": "Metro"
+          "name": "dokończenie budowy odcinka wschodniego - północnego II linii metra (do stacji \"Bródno\")",
+          "amount_mln": 416.4
         },
         {
-          "name": "Drogi i mosty",
-          "amount": 203000000,
-          "category": "Drogi"
+          "name": "kontynuacja budowy odcinka zachodniego od szlaku za stacją \"Księcia Janusza\" do stacji \"Powstańców Śląskich\"",
+          "amount_mln": 384.4
         },
         {
-          "name": "Szkoły, przedszkola, żłobki",
-          "amount": 120000000,
-          "category": "Edukacja"
+          "name": "dokończenie budowy odcinka zachodniego od szlaku za stacją \"Powstańców Śląskich\" do stacji \"Połczyńska\" wraz ze Stacją Techniczno - Postojową \"Mory\"",
+          "amount_mln": 130.3
+        },
+        {
+          "name": "Budowa Szpitala Południowego",
+          "amount_mln": 123.4
+        },
+        {
+          "name": "Budowa Muzeum Sztuki Nowoczesnej",
+          "amount_mln": 90.0
         }
       ]
     },
@@ -771,26 +749,26 @@
           "amount": 201000000
         }
       ],
-      "top_project": {
-        "name": "II linia metra — odcinek zachodni",
-        "amount": 549000000,
-        "category": "Metro"
-      },
       "top_projects": [
         {
-          "name": "II linia metra — odcinek zachodni",
-          "amount": 549000000,
-          "category": "Metro"
+          "name": "kontynuacja budowy odcinka zachodniego od szlaku za stacją \"Księcia Janusza\" do stacji \"Powstańców Śląskich\"",
+          "amount_mln": 191.1
         },
         {
-          "name": "Drogi i infrastruktura drogowa",
-          "amount": 270000000,
-          "category": "Drogi"
+          "name": "dokończenie budowy odcinka wschodniego - północnego II linii metra (do stacji \"Bródno\")",
+          "amount_mln": 143.4
         },
         {
-          "name": "Muzeum Sztuki Nowoczesnej",
-          "amount": 82000000,
-          "category": "Kultura"
+          "name": "Budowa Muzeum Sztuki Nowoczesnej",
+          "amount_mln": 137.9
+        },
+        {
+          "name": "dokończenie budowy odcinka zachodniego od szlaku za stacją \"Powstańców Śląskich\" do stacji \"Połczyńska\" wraz ze Stacją Techniczno - Postojową \"Mory\"",
+          "amount_mln": 130.4
+        },
+        {
+          "name": "Płatność z tytułu refundacji wydatków na zakup taboru na potrzeby projektu \"Budowa II linii metra, wraz z infrastrukturą towarzyszącą i zakupem taboru - etap II\"",
+          "amount_mln": 98.0
         }
       ]
     },
@@ -826,26 +804,26 @@
           "amount": 179000000
         }
       ],
-      "top_project": {
-        "name": "II linia metra — odcinek zachodni",
-        "amount": 541000000,
-        "category": "Metro"
-      },
       "top_projects": [
         {
-          "name": "II linia metra — odcinek zachodni",
-          "amount": 541000000,
-          "category": "Metro"
+          "name": "dokończenie budowy odcinka wschodniego - północnego II linii metra (do stacji \"Bródno\")",
+          "amount_mln": 191.8
         },
         {
-          "name": "Drogi i infrastruktura drogowa",
-          "amount": 522000000,
-          "category": "Drogi"
+          "name": "Budowa Muzeum Sztuki Nowoczesnej",
+          "amount_mln": 130.5
         },
         {
-          "name": "Muzeum Sztuki Nowoczesnej",
-          "amount": 123000000,
-          "category": "Kultura"
+          "name": "Płatność z tytułu refundacji wydatków na zakup taboru na potrzeby projektu \"Budowa II linii metra, wraz z infrastrukturą towarzyszącą i zakupem taboru - etap II\"",
+          "amount_mln": 120.0
+        },
+        {
+          "name": "dokończenie budowy odcinka zachodniego od szlaku za stacją \"Powstańców Śląskich\" do stacji \"Połczyńska\" wraz ze Stacją Techniczno - Postojową \"Mory\"",
+          "amount_mln": 112.2
+        },
+        {
+          "name": "kontynuacja budowy odcinka zachodniego od szlaku za stacją \"Księcia Janusza\" do stacji \"Powstańców Śląskich\"",
+          "amount_mln": 101.8
         }
       ]
     },
@@ -881,26 +859,26 @@
           "amount": 163000000
         }
       ],
-      "top_project": {
-        "name": "II linia metra — odcinek zachodni",
-        "amount": 670000000,
-        "category": "Metro"
-      },
       "top_projects": [
         {
-          "name": "II linia metra — odcinek zachodni",
-          "amount": 670000000,
-          "category": "Metro"
+          "name": "dokończenie budowy odcinka zachodniego od szlaku za stacją \"Powstańców Śląskich\" do stacji \"Połczyńska\" wraz ze Stacją Techniczno - Postojową \"Mory\"",
+          "amount_mln": 284.0
         },
         {
-          "name": "Drogi i infrastruktura drogowa",
-          "amount": 610000000,
-          "category": "Drogi"
+          "name": "Budowa Muzeum Sztuki Nowoczesnej",
+          "amount_mln": 159.0
         },
         {
-          "name": "Szkoły, przedszkola, żłobki",
-          "amount": 500000000,
-          "category": "Edukacja"
+          "name": "odcinek zachodni: od szlaku za stacją \"Rondo Daszyńskiego\" do stacji \"Księcia Janusza\"",
+          "amount_mln": 78.5
+        },
+        {
+          "name": "dokończenie budowy odcinka wschodniego - północnego II linii metra (do stacji \"Bródno\")",
+          "amount_mln": 65.7
+        },
+        {
+          "name": "Płatność z tytułu refundacji wydatków na zakup taboru na potrzeby projektu \"Budowa II linii metra wraz z zakupem taboru- etap III\"",
+          "amount_mln": 54.6
         }
       ]
     },
@@ -936,26 +914,26 @@
           "amount": 153000000
         }
       ],
-      "top_project": {
-        "name": "II linia metra — odcinek zachodni",
-        "amount": 711000000,
-        "category": "Metro"
-      },
       "top_projects": [
         {
-          "name": "Drogi i infrastruktura drogowa",
-          "amount": 730000000,
-          "category": "Drogi"
+          "name": "dokończenie budowy odcinka zachodniego od szlaku za stacją \"Powstańców Śląskich\" do stacji \"Połczyńska\" wraz ze Stacją Techniczno - Postojową \"Mory\"",
+          "amount_mln": 298.8
         },
         {
-          "name": "II linia metra — odcinek zachodni",
-          "amount": 711000000,
-          "category": "Metro"
+          "name": "Modernizacja Sali Kongresowej w budynku Pałacu Kultury i Nauki - etap II",
+          "amount_mln": 130.2
         },
         {
-          "name": "Sala Kongresowa PKiN",
-          "amount": 130000000,
-          "category": "Kultura"
+          "name": "Modernizacja zabytkowych obiektów oraz budowa sali koncertowej przy ul. Grochowskiej na potrzeby Sinfonia Varsovia - etap I",
+          "amount_mln": 100.4
+        },
+        {
+          "name": "Budowa Muzeum Sztuki Nowoczesnej",
+          "amount_mln": 68.9
+        },
+        {
+          "name": "Zakup 12 autobusów niskoemisyjnych dla m.st. Warszawy",
+          "amount_mln": 51.3
         }
       ]
     },
@@ -991,71 +969,28 @@
           "amount": 200000000
         }
       ],
-      "top_project": {
-        "name": "II linia metra — odcinek zachodni do Ursusa",
-        "amount": 724000000,
-        "category": "Metro"
-      },
       "top_projects": [
         {
-          "name": "II linia metra — odcinek do Ursusa",
-          "amount": 724000000,
-          "category": "Metro"
+          "name": "dokończenie budowy odcinka zachodniego od szlaku za stacją \"Powstańców Śląskich\" do stacji \"Połczyńska\" wraz ze Stacją Techniczno - Postojową \"Mory\"",
+          "amount_mln": 723.7
         },
         {
-          "name": "Szkoły, przedszkola, żłobki",
-          "amount": 450000000,
-          "category": "Edukacja"
+          "name": "Modernizacja Sali Kongresowej w budynku Pałacu Kultury i Nauki - etap II",
+          "amount_mln": 91.3
         },
         {
-          "name": "Drogi i infrastruktura drogowa",
-          "amount": 400000000,
-          "category": "Drogi"
+          "name": "Modernizacja budynku Instytutu Głuchoniemych przy Pl. Trzech Krzyży 4/6",
+          "amount_mln": 44.0
+        },
+        {
+          "name": "Budowa Teatru Rozmaitości",
+          "amount_mln": 30.0
+        },
+        {
+          "name": "Modernizacja zabytkowych obiektów oraz budowa sali koncertowej przy ul. Grochowskiej na potrzeby Sinfonia Varsovia",
+          "amount_mln": 30.0
         }
       ]
     }
-  },
-  "top_projects": [
-    {
-      "name": "II linia metra - odcinek zachodni do Ursusa",
-      "amount": 724000000,
-      "category": "Metro",
-      "status": "W budowie",
-      "year_start": 2020,
-      "year_end": 2028
-    },
-    {
-      "name": "Tramwaj na Goclaw",
-      "amount": 350000000,
-      "category": "Transport",
-      "status": "Projektowanie",
-      "year_start": 2026,
-      "year_end": 2029,
-      "eu_funding": 180000000
-    },
-    {
-      "name": "Tramwaj na Zielona Bialoleke",
-      "amount": 280000000,
-      "category": "Transport",
-      "status": "Projektowanie",
-      "year_start": 2026,
-      "year_end": 2029
-    },
-    {
-      "name": "Wklad do Tramwaje Warszawskie Sp. z o.o.",
-      "amount": 100000000,
-      "category": "Transport",
-      "status": "Realizacja",
-      "year_start": 2026,
-      "year_end": 2026
-    },
-    {
-      "name": "Modernizacja Sali Kongresowej PKiN",
-      "amount": 91000000,
-      "category": "Kultura",
-      "status": "W budowie",
-      "year_start": 2025,
-      "year_end": 2027
-    }
-  ]
+  }
 }
