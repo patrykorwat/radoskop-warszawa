@@ -660,7 +660,12 @@
           "name": "Inne",
           "amount": 100000000
         }
-      ]
+      ],
+      "top_project": {
+        "name": "II linia metra — odcinek zachodni",
+        "amount": 839000000,
+        "category": "Metro"
+      }
     },
     "2021": {
       "total": 2810000000,
@@ -693,7 +698,12 @@
           "name": "Inne",
           "amount": 150000000
         }
-      ]
+      ],
+      "top_project": {
+        "name": "II linia metra — odcinek zachodni",
+        "amount": 640000000,
+        "category": "Metro"
+      }
     },
     "2022": {
       "total": 2850000000,
@@ -726,7 +736,12 @@
           "name": "Inne",
           "amount": 201000000
         }
-      ]
+      ],
+      "top_project": {
+        "name": "II linia metra — odcinek zachodni",
+        "amount": 549000000,
+        "category": "Metro"
+      }
     },
     "2023": {
       "total": 2900000000,
@@ -759,7 +774,12 @@
           "name": "Inne",
           "amount": 179000000
         }
-      ]
+      ],
+      "top_project": {
+        "name": "II linia metra — odcinek zachodni",
+        "amount": 541000000,
+        "category": "Metro"
+      }
     },
     "2024": {
       "total": 3053000000,
@@ -792,7 +812,12 @@
           "name": "Inne",
           "amount": 163000000
         }
-      ]
+      ],
+      "top_project": {
+        "name": "II linia metra — odcinek zachodni",
+        "amount": 670000000,
+        "category": "Metro"
+      }
     },
     "2025": {
       "total": 3143000000,
@@ -825,7 +850,12 @@
           "name": "Inne",
           "amount": 153000000
         }
-      ]
+      ],
+      "top_project": {
+        "name": "II linia metra — odcinek zachodni",
+        "amount": 711000000,
+        "category": "Metro"
+      }
     },
     "2026": {
       "total": 3936000000,
@@ -858,7 +888,12 @@
           "name": "Inne",
           "amount": 200000000
         }
-      ]
+      ],
+      "top_project": {
+        "name": "II linia metra — odcinek zachodni do Ursusa",
+        "amount": 724000000,
+        "category": "Metro"
+      }
     }
   },
   "top_projects": [
