@@ -665,7 +665,24 @@
         "name": "II linia metra — odcinek zachodni",
         "amount": 839000000,
         "category": "Metro"
-      }
+      },
+      "top_projects": [
+        {
+          "name": "II linia metra — odcinek zachodni",
+          "amount": 839000000,
+          "category": "Metro"
+        },
+        {
+          "name": "Drogi i infrastruktura drogowa",
+          "amount": 428000000,
+          "category": "Drogi"
+        },
+        {
+          "name": "Szkoły, przedszkola, żłobki",
+          "amount": 300000000,
+          "category": "Edukacja"
+        }
+      ]
     },
     "2021": {
       "total": 2810000000,
@@ -703,7 +720,24 @@
         "name": "II linia metra — odcinek zachodni",
         "amount": 640000000,
         "category": "Metro"
-      }
+      },
+      "top_projects": [
+        {
+          "name": "II linia metra — odcinek zachodni",
+          "amount": 640000000,
+          "category": "Metro"
+        },
+        {
+          "name": "Drogi i mosty",
+          "amount": 203000000,
+          "category": "Drogi"
+        },
+        {
+          "name": "Szkoły, przedszkola, żłobki",
+          "amount": 120000000,
+          "category": "Edukacja"
+        }
+      ]
     },
     "2022": {
       "total": 2850000000,
@@ -741,7 +775,24 @@
         "name": "II linia metra — odcinek zachodni",
         "amount": 549000000,
         "category": "Metro"
-      }
+      },
+      "top_projects": [
+        {
+          "name": "II linia metra — odcinek zachodni",
+          "amount": 549000000,
+          "category": "Metro"
+        },
+        {
+          "name": "Drogi i infrastruktura drogowa",
+          "amount": 270000000,
+          "category": "Drogi"
+        },
+        {
+          "name": "Muzeum Sztuki Nowoczesnej",
+          "amount": 82000000,
+          "category": "Kultura"
+        }
+      ]
     },
     "2023": {
       "total": 2900000000,
@@ -779,7 +830,24 @@
         "name": "II linia metra — odcinek zachodni",
         "amount": 541000000,
         "category": "Metro"
-      }
+      },
+      "top_projects": [
+        {
+          "name": "II linia metra — odcinek zachodni",
+          "amount": 541000000,
+          "category": "Metro"
+        },
+        {
+          "name": "Drogi i infrastruktura drogowa",
+          "amount": 522000000,
+          "category": "Drogi"
+        },
+        {
+          "name": "Muzeum Sztuki Nowoczesnej",
+          "amount": 123000000,
+          "category": "Kultura"
+        }
+      ]
     },
     "2024": {
       "total": 3053000000,
@@ -817,7 +885,24 @@
         "name": "II linia metra — odcinek zachodni",
         "amount": 670000000,
         "category": "Metro"
-      }
+      },
+      "top_projects": [
+        {
+          "name": "II linia metra — odcinek zachodni",
+          "amount": 670000000,
+          "category": "Metro"
+        },
+        {
+          "name": "Drogi i infrastruktura drogowa",
+          "amount": 610000000,
+          "category": "Drogi"
+        },
+        {
+          "name": "Szkoły, przedszkola, żłobki",
+          "amount": 500000000,
+          "category": "Edukacja"
+        }
+      ]
     },
     "2025": {
       "total": 3143000000,
@@ -855,7 +940,24 @@
         "name": "II linia metra — odcinek zachodni",
         "amount": 711000000,
         "category": "Metro"
-      }
+      },
+      "top_projects": [
+        {
+          "name": "Drogi i infrastruktura drogowa",
+          "amount": 730000000,
+          "category": "Drogi"
+        },
+        {
+          "name": "II linia metra — odcinek zachodni",
+          "amount": 711000000,
+          "category": "Metro"
+        },
+        {
+          "name": "Sala Kongresowa PKiN",
+          "amount": 130000000,
+          "category": "Kultura"
+        }
+      ]
     },
     "2026": {
       "total": 3936000000,
@@ -893,7 +995,24 @@
         "name": "II linia metra — odcinek zachodni do Ursusa",
         "amount": 724000000,
         "category": "Metro"
-      }
+      },
+      "top_projects": [
+        {
+          "name": "II linia metra — odcinek do Ursusa",
+          "amount": 724000000,
+          "category": "Metro"
+        },
+        {
+          "name": "Szkoły, przedszkola, żłobki",
+          "amount": 450000000,
+          "category": "Edukacja"
+        },
+        {
+          "name": "Drogi i infrastruktura drogowa",
+          "amount": 400000000,
+          "category": "Drogi"
+        }
+      ]
     }
   },
   "top_projects": [
