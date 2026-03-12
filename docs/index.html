@@ -160,6 +160,10 @@ canvas { max-height:760px; }
 .filter-bar { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
 .filter-btn { padding:4px 12px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-size:0.8rem; }
 .filter-btn.active { background:var(--accent); color:white; border-color:var(--accent); }
+.seo-tab-desc { color:var(--muted); font-size:0.82rem; line-height:1.6; margin-bottom:14px; padding:0; }
+.pager-btn { padding:8px 12px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-size:0.8rem; margin:2px; }
+.pager-btn:hover { border-color:var(--accent); color:var(--accent); }
+.pager-btn.active { background:var(--accent); color:white; border-color:var(--accent); }
 footer { text-align:center; padding:40px 0; color:var(--muted); font-size:0.8rem; border-top:1px solid var(--border); margin-top:40px; }
 footer a { color:var(--accent); text-decoration:none; }
 #loading { text-align:center; padding:100px; color:var(--muted); }
@@ -403,6 +407,7 @@ header { min-height:80px; }
         <button class="tab active" data-tab="ranking">Ranking radnych</button>
         <button class="tab" data-tab="profiles">Profile radnych</button>
         <button class="tab" data-tab="sessions">Sesje</button>
+        <button class="tab" data-tab="interpelacje">Interpelacje</button>
         <button class="tab" data-tab="votes">Głosowania</button>
         <button class="tab" data-tab="similarity">Kto z kim głosuje</button>
         <button class="tab tab-budget" data-tab="budget">Budżet</button>
@@ -457,6 +462,27 @@ header { min-height:80px; }
       </div>
     </div>
 
+    <div id="tab-interpelacje" class="section" style="display:none">
+      <p class="seo-tab-desc">Interpelacje i zapytania radnych Miasta Warszawy — pełna baza z kadencji 2024–2029 i 2018–2023. Wyszukiwanie po temacie, autorze, kategorii. Linki do treści PDF i odpowiedzi urzędu.</p>
+      <div class="profile-metrics" id="interpelacje-stats" style="margin-bottom:16px"></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <input type="text" id="interpelacje-search" placeholder="Szukaj po temacie, radnym lub numerze..." style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:0.9rem">
+        <select id="interpelacje-typ-filter" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:0.9rem">
+          <option value="all">Wszystkie typy</option>
+          <option value="interpelacja">Interpelacje</option>
+          <option value="zapytanie">Zapytania</option>
+        </select>
+        <select id="interpelacje-cat-filter" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:0.9rem">
+          <option value="all">Wszystkie kategorie</option>
+        </select>
+        <select id="interpelacje-radny-filter" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:0.9rem">
+          <option value="all">Wszyscy radni</option>
+        </select>
+      </div>
+      <div id="interpelacje-list"></div>
+      <div id="interpelacje-pager" style="text-align:center;margin-top:16px"></div>
+    </div>
+
     <div id="tab-votes" class="section" style="display:none">
       <div class="filter-bar" id="cat-filter" style="margin-bottom:12px;flex-wrap:wrap"></div>
       <div id="votes-grouped"></div>
@@ -483,6 +509,9 @@ header { min-height:80px; }
 
   <!-- Session detail view -->
   <div id="session-view" style="display:none"></div>
+
+  <!-- Interpelacja detail view -->
+  <div id="interpelacja-view" style="display:none"></div>
 
   <footer>
     Radoskop — otwarte narzędzie monitoringu samorządu.
@@ -549,6 +578,48 @@ function catPill(cat) {
   return `<span class="cat-pill cat-${cat}">${c.label}</span>`;
 }
 
+// Interpelacje categories — auto-classification by topic keywords
+const INTERP_CATS = {
+  drogi:          { label: 'Drogi i chodniki', color: '#6366f1', order: 1 },
+  transport:      { label: 'Transport',        color: '#0ea5e9', order: 2 },
+  inwestycje:     { label: 'Inwestycje',       color: '#f59e0b', order: 3 },
+  nieruchomosci:  { label: 'Nieruchomości',    color: '#8b5cf6', order: 4 },
+  zielen:         { label: 'Zieleń',           color: '#22c55e', order: 5 },
+  bezpieczenstwo: { label: 'Bezpieczeństwo',   color: '#ef4444', order: 6 },
+  edukacja:       { label: 'Edukacja',         color: '#ec4899', order: 7 },
+  porzadek:       { label: 'Porządek',         color: '#f97316', order: 8 },
+  parkowanie:     { label: 'Parkowanie',       color: '#64748b', order: 9 },
+  kultura:        { label: 'Kultura i sport',  color: '#14b8a6', order: 10 },
+  spoleczne:      { label: 'Sprawy społeczne', color: '#a855f7', order: 11 },
+  inne:           { label: 'Inne',             color: '#9ca3af', order: 99 },
+};
+const INTERP_CAT_KWS = [
+  ['drogi', ['ulic','chodnik','nawierzchni','jezdni','drog','asfalt','skrzyżow','rondo ','estakad','most ','mostu','wiadukt','kładk','przejści','pieszych','ścieżk','rowerow','tunel','słupków','utwardzen','barierek','schodów','progów zwal']],
+  ['transport', ['autobusow','tramwaj','przystan','wiaty','wiat ','komunikacj','linii ','pkm','ztm','rozkład','przejazd','kolej','peronów','dworzec','ruchu ','pojazdów']],
+  ['bezpieczenstwo', ['bezpieczeńst','monitoring','kamer','oświetleni','lamp','latarni','straż','policj','defibrylat','sygnalizac','świateł','światło']],
+  ['edukacja', ['szkoł','przedszkol','placówk','oświatow','uczni','kształceni','edukac','żłobk','młodzieży']],
+  ['zielen', ['drzew','parku','park ','zieleni','zielony','plac zabaw','placu zabaw','rekreac','ogrod','deszczow','środowisk','ekolog','smog','hałas','fetor','odpad','śmiec','czystości','uprząt','krajobraz']],
+  ['nieruchomosci', ['nieruchom','lokalu','budynk','mieszka','wynajm','pustosta','kamieni','elewac','okien ','podwórk','wspólnot','działki','działek']],
+  ['inwestycje', ['remont','modernizac','inwestycj','przebudow','budowy','rewaloryz','rewitalizac','renowac','napraw','wymian','zagospodarowan']],
+  ['parkowanie', ['parkowan','parkometr','strefa płatn','parking','zatrzymyw','postoju']],
+  ['kultura', ['kultur','sport','stadion','boisk','pływa','muzeum','teatr','bibliotek','festiwal','pomnik','zabytk','historycz']],
+  ['spoleczne', ['pomoc','społeczn','niepełnospr','senior','bezdomn','opiek','zdrow','szpital','przychodni','terapeu']],
+  ['porzadek', ['porządku','graffiti','dewastacj','wandali','nielegalne','dzikie','porzucon','wraki','reklam','kiosków','uporządkow','usunięci']],
+];
+function categorizeInterpelacja(przedmiot) {
+  if (!przedmiot) return 'inne';
+  const s = przedmiot.toLowerCase();
+  for (const [cat, kws] of INTERP_CAT_KWS) {
+    if (kws.some(kw => s.includes(kw))) return cat;
+  }
+  return 'inne';
+}
+function interpCatPill(cat) {
+  const c = INTERP_CATS[cat];
+  if (!c) return '';
+  return `<span style="background:${c.color}18;color:${c.color};padding:1px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;white-space:nowrap">${c.label}</span>`;
+}
+
 // Sort names by last name, then first name
 function sortByLastName(names) {
   return [...names].sort((a, b) => {
@@ -574,14 +645,16 @@ async function init() {
     history.replaceState(null, '', decodeURIComponent(sp.get('p')));
   }
   try {
-    const [dataResp, profResp, budgetResp] = await Promise.all([
+    const [dataResp, profResp, budgetResp, interpResp] = await Promise.all([
       fetch('/data.json'),
       fetch('/profiles.json'),
-      fetch('/budget.json')
+      fetch('/budget.json'),
+      fetch('/interpelacje.json')
     ]);
     RAW = await dataResp.json();
     PROFILES = await profResp.json();
     window.BUDGET = budgetResp.ok ? await budgetResp.json() : {};
+    window.INTERPELACJE = interpResp.ok ? await interpResp.json() : [];
     document.getElementById('loading').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     renderKadencjaBar();
@@ -610,6 +683,13 @@ async function init() {
       selectKadencjaQuiet(defaultKid);
       const snum = decodeURIComponent(path.replace('/sesja/', ''));
       showSession(snum);
+      navigateTo(path, true);
+      return;
+    }
+    if (path.startsWith('/interpelacja/')) {
+      selectKadencjaQuiet(defaultKid);
+      const cri = decodeURIComponent(path.replace('/interpelacja/', '').replace(/-/g, '/'));
+      showInterpelacja(cri);
       navigateTo(path, true);
       return;
     }
@@ -666,7 +746,7 @@ function selectKadencja(kid) {
 }
 
 function activateTab(tabName) {
-  const allTabs = ['ranking','profiles','sessions','votes','similarity','budget'];
+  const allTabs = ['ranking','profiles','sessions','interpelacje','votes','similarity','budget'];
   currentTab = tabName;
   document.querySelectorAll('.tab').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === tabName);
@@ -675,7 +755,7 @@ function activateTab(tabName) {
     const el = document.getElementById('tab-'+t);
     if (el) el.style.display = (t === tabName) ? 'block' : 'none';
   });
-  document.getElementById('kadencja-bar').style.display = tabName === 'budget' ? 'none' : '';
+  document.getElementById('kadencja-bar').style.display = (tabName === 'budget' || tabName === 'interpelacje') ? 'none' : '';
   setTitle(TAB_TITLES[tabName] || '');
 }
 
@@ -684,16 +764,17 @@ function hideAllViews() {
   document.getElementById('profile-view').style.display = 'none';
   document.getElementById('vote-view').style.display = 'none';
   document.getElementById('session-view').style.display = 'none';
+  document.getElementById('interpelacja-view').style.display = 'none';
 }
 
 let currentTab = 'ranking';
-const TAB_SLUGS = {ranking:'ranking',profiles:'radni',sessions:'sesje',votes:'glosowania',similarity:'podobienstwo',budget:'budzet'};
+const TAB_SLUGS = {ranking:'ranking',profiles:'radni',sessions:'sesje',interpelacje:'interpelacje',votes:'glosowania',similarity:'podobienstwo',budget:'budzet'};
 const SLUG_TABS = Object.fromEntries(Object.entries(TAB_SLUGS).map(([k,v])=>[v,k]));
 const KAD_SLUGS = {'2018-2023':'viii','2024-2029':'ix'};
 const SLUG_KADS = Object.fromEntries(Object.entries(KAD_SLUGS).map(([k,v])=>[v,k]));
 
 const BASE_TITLE = 'Radoskop Warszawa — Jak głosują radni?';
-const TAB_TITLES = {ranking:'Ranking radnych',profiles:'Profile radnych',sessions:'Sesje',votes:'Głosowania',similarity:'Podobieństwo',budget:'Budżet'};
+const TAB_TITLES = {ranking:'Ranking radnych',profiles:'Profile radnych',sessions:'Sesje',interpelacje:'Interpelacje',votes:'Głosowania',similarity:'Podobieństwo',budget:'Budżet'};
 function setTitle(subtitle) {
   document.title = subtitle ? subtitle + ' — ' + BASE_TITLE : BASE_TITLE;
 }
@@ -736,6 +817,7 @@ function render() {
   renderCouncilorTable();
   renderProfilesGrid();
   renderSessionsTable();
+  renderInterpelacjeTable();
   renderVotesTable();
   renderSimilarity();
   renderBudget();
@@ -1131,7 +1213,12 @@ function showProfile(name) {
       html += `</div>`;
     }
 
-    // Votes grouped by session
+    // ── Profile sub-tabs: Interpelacje / Głosowania ──
+    const interpAll = (window.INTERPELACJE || []).filter(i => i.radny === profile.name);
+    const showInterpItems = interpAll;
+    const hasInterp = showInterpItems.length > 0;
+
+    // Build votes data
     let allPersonVotes = [];
     let profCatCounts = {};
     const profCatOrder = Object.keys(VOTE_CATS).sort((a,b) => (VOTE_CATS[a]?.order||99) - (VOTE_CATS[b]?.order||99));
@@ -1139,8 +1226,6 @@ function showProfile(name) {
       const kadData = RAW.kadencje.find(k => k.id === kid);
       if (kadData) {
         const sessions = [...(kadData.sessions || [])].sort((a,b) => b.date.localeCompare(a.date));
-        const voteLabel = (v) => ({za:'za',przeciw:'przeciw',wstrzymal_sie:isFemale(profile.name)?'wstrzymała się':'wstrzymał się',brak_glosu:'brak głosu',nieobecny:isFemale(profile.name)?'nieobecna':'nieobecny'})[v]||v||'—';
-        const votePillClass = (v) => ({za:'za',przeciw:'przeciw',wstrzymal_sie:'wstrzymal',brak_glosu:'wstrzymal',nieobecny:'wstrzymal'})[v]||'wstrzymal';
         for (const sess of sessions) {
           const sessionVotes = getSessionVotes(kadData.votes, kadData.sessions, sess);
           if (sessionVotes.length === 0) continue;
@@ -1156,47 +1241,130 @@ function showProfile(name) {
           }).filter(x => x.pv !== null);
           allPersonVotes.push(...personVotes);
         }
-
-        // Category counts for filter
         allPersonVotes.forEach(x => { profCatCounts[x.cat] = (profCatCounts[x.cat]||0) + 1; });
-
-        html += `<div class="section">
-          <h2>Głosy na sesjach</h2>
-          <div class="filter-bar" id="profile-cat-filter" style="margin-bottom:12px;flex-wrap:wrap"></div>
-          <div id="profile-votes-container">`;
-
-        // Group by session
-        const sessGroups = {};
-        allPersonVotes.forEach(x => {
-          const key = x.sess.date;
-          if (!sessGroups[key]) sessGroups[key] = { sess: x.sess, votes: [] };
-          sessGroups[key].votes.push(x);
-        });
-        const sessKeys = Object.keys(sessGroups).sort((a,b) => b.localeCompare(a));
-
-        for (const sk of sessKeys) {
-          const { sess, votes: pvs } = sessGroups[sk];
-          html += `<div class="profile-sess-group" data-sessdate="${sess.date}" style="margin-bottom:16px">
-            <div style="font-weight:600;margin-bottom:6px;font-size:0.9rem">
-              <a class="name-link" href="/sesja/${encodeURIComponent(sess.number)}" onclick="event.preventDefault();showSession('${sess.number}')">Sesja ${sess.number} · ${sess.date}</a>
-              <span class="sess-vote-count" style="color:var(--muted);font-weight:400;margin-left:8px">(${pvs.length} głosowań)</span>
-            </div>
-            <table><tbody>`;
-          pvs.forEach(({vote: v, pv, cat}) => {
-            html += `<tr class="vote-row" data-vcat="${cat}" onclick="showVote('${v.id}')">
-              <td style="width:100px"><span class="pill pill-${votePillClass(pv)}">${voteLabel(pv)}</span></td>
-              <td style="text-align:left;font-size:0.85rem">${catPill(cat)} ${v.topic || '—'}</td>
-            </tr>`;
-          });
-          html += `</tbody></table></div>`;
-        }
-        html += `</div></div>`;
       }
+    }
+
+    // Tab bar (Interpelacje / Głosowania)
+    if (hasInterp || hasVotes) {
+      html += `<div class="tab-bar" id="profile-detail-tabs" style="margin-bottom:16px">`;
+      if (hasInterp) html += `<button class="tab active" data-ptab="interp">Interpelacje (${showInterpItems.length})</button>`;
+      if (hasVotes) html += `<button class="tab${hasInterp ? '' : ' active'}" data-ptab="votes">Głosowania (${allPersonVotes.length})</button>`;
+      html += `</div>`;
+    }
+
+    // ── Interpelacje tab content ──
+    const interpCatCounts = {};
+    showInterpItems.forEach(item => {
+      const cat = categorizeInterpelacja(item.przedmiot);
+      interpCatCounts[cat] = (interpCatCounts[cat] || 0) + 1;
+    });
+    const interpCatOrder = Object.keys(INTERP_CATS).sort((a,b) => (INTERP_CATS[a]?.order||99) - (INTERP_CATS[b]?.order||99));
+    if (hasInterp) {
+      const interpCount = showInterpItems.filter(i => i.typ === 'interpelacja').length;
+      const zapCount = showInterpItems.filter(i => i.typ === 'zapytanie').length;
+
+      html += `<div id="profile-tab-interp" class="section">
+        <div style="color:var(--muted);font-size:0.85rem;margin-bottom:12px">${interpCount} interpelacji, ${zapCount} zapytań</div>
+        <div class="filter-bar" id="profile-interp-cat-filter" style="margin-bottom:12px;flex-wrap:wrap"></div>
+        <div id="profile-interp-container">`;
+      showInterpItems.forEach(item => {
+        const oCri = (item.cri || '').replace(/'/g, "\\'");
+        const cat = categorizeInterpelacja(item.przedmiot);
+        const typBadge = item.typ === 'zapytanie'
+          ? '<span style="background:rgba(37,99,235,0.12);color:var(--blue,#2563eb);padding:1px 5px;border-radius:3px;font-size:0.7rem;font-weight:600">Z</span>'
+          : '<span style="background:rgba(79,70,229,0.12);color:var(--accent);padding:1px 5px;border-radius:3px;font-size:0.7rem;font-weight:600">I</span>';
+        html += `<div class="interp-row" data-icat="${cat}" onclick="showInterpelacja('${oCri}')" style="cursor:pointer;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;background:var(--card)">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            ${typBadge}
+            ${interpCatPill(cat)}
+            <span style="font-weight:600;font-size:0.8rem;color:var(--accent)">${item.cri}</span>
+            <span style="font-size:0.75rem;color:var(--muted)">${item.data_wplywu}</span>
+            ${item.data_odpowiedzi ? '<span style="color:var(--green,#16a34a);font-size:0.7rem">&#10003;</span>' : ''}
+          </div>
+          <div style="font-size:0.85rem">${item.przedmiot || ''}</div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // ── Głosowania tab content ──
+    if (hasVotes && allPersonVotes.length > 0) {
+      const voteLabel = (v) => ({za:'za',przeciw:'przeciw',wstrzymal_sie:isFemale(profile.name)?'wstrzymała się':'wstrzymał się',brak_glosu:'brak głosu',nieobecny:isFemale(profile.name)?'nieobecna':'nieobecny'})[v]||v||'—';
+      const votePillClass = (v) => ({za:'za',przeciw:'przeciw',wstrzymal_sie:'wstrzymal',brak_glosu:'wstrzymal',nieobecny:'wstrzymal'})[v]||'wstrzymal';
+
+      html += `<div id="profile-tab-votes" class="section" style="${hasInterp ? 'display:none' : ''}">
+        <div class="filter-bar" id="profile-cat-filter" style="margin-bottom:12px;flex-wrap:wrap"></div>
+        <div id="profile-votes-container">`;
+
+      const sessGroups = {};
+      allPersonVotes.forEach(x => {
+        const key = x.sess.date;
+        if (!sessGroups[key]) sessGroups[key] = { sess: x.sess, votes: [] };
+        sessGroups[key].votes.push(x);
+      });
+      const sessKeys = Object.keys(sessGroups).sort((a,b) => b.localeCompare(a));
+
+      for (const sk of sessKeys) {
+        const { sess, votes: pvs } = sessGroups[sk];
+        html += `<div class="profile-sess-group" data-sessdate="${sess.date}" style="margin-bottom:16px">
+          <div style="font-weight:600;margin-bottom:6px;font-size:0.9rem">
+            <a class="name-link" href="/sesja/${encodeURIComponent(sess.number)}" onclick="event.preventDefault();showSession('${sess.number}')">Sesja ${sess.number} · ${sess.date}</a>
+            <span class="sess-vote-count" style="color:var(--muted);font-weight:400;margin-left:8px">(${pvs.length} głosowań)</span>
+          </div>
+          <table><tbody>`;
+        pvs.forEach(({vote: v, pv, cat}) => {
+          html += `<tr class="vote-row" data-vcat="${cat}" onclick="showVote('${v.id}')">
+            <td style="width:100px"><span class="pill pill-${votePillClass(pv)}">${voteLabel(pv)}</span></td>
+            <td style="text-align:left;font-size:0.85rem">${catPill(cat)} ${v.topic || '—'}</td>
+          </tr>`;
+        });
+        html += `</tbody></table></div>`;
+      }
+      html += `</div></div>`;
     }
 
     view.innerHTML = html;
 
-    // Wire up profile category filter
+    // Wire up profile detail tabs (Interpelacje / Głosowania)
+    const profTabBar = document.getElementById('profile-detail-tabs');
+    if (profTabBar) {
+      profTabBar.querySelectorAll('.tab').forEach(btn => {
+        btn.onclick = () => {
+          profTabBar.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const t = btn.dataset.ptab;
+          const interpEl = document.getElementById('profile-tab-interp');
+          const votesEl = document.getElementById('profile-tab-votes');
+          if (interpEl) interpEl.style.display = t === 'interp' ? '' : 'none';
+          if (votesEl) votesEl.style.display = t === 'votes' ? '' : 'none';
+        };
+      });
+    }
+
+    // Wire up profile interpelacje category filter
+    const profInterpCatBar = document.getElementById('profile-interp-cat-filter');
+    if (profInterpCatBar) {
+      let pif = `<button class="session-pill active" data-icat="all">Wszystkie <span class="pill-count">(${showInterpItems.length})</span></button>`;
+      for (const cat of interpCatOrder) {
+        if (!interpCatCounts[cat]) continue;
+        const c = INTERP_CATS[cat];
+        pif += `<button class="session-pill" data-icat="${cat}" style="--pill-color:${c.color}">${c.label} <span class="pill-count">(${interpCatCounts[cat]})</span></button>`;
+      }
+      profInterpCatBar.innerHTML = pif;
+      profInterpCatBar.querySelectorAll('.session-pill').forEach(btn => {
+        btn.onclick = () => {
+          profInterpCatBar.querySelectorAll('.session-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const cat = btn.dataset.icat;
+          document.querySelectorAll('#profile-interp-container .interp-row').forEach(el => {
+            el.style.display = (cat === 'all' || el.dataset.icat === cat) ? '' : 'none';
+          });
+        };
+      });
+    }
+
+    // Wire up profile votes category filter
     const profCatBar = document.getElementById('profile-cat-filter');
     if (profCatBar) {
       let pf = `<button class="session-pill active" data-pcat="all">Wszystkie <span class="pill-count">(${allPersonVotes.length})</span></button>`;
@@ -1213,7 +1381,6 @@ function showProfile(name) {
           document.querySelectorAll('#profile-votes-container .vote-row').forEach(tr => {
             tr.style.display = (cat === 'all' || tr.dataset.vcat === cat) ? '' : 'none';
           });
-          // Hide empty session groups and update counts
           document.querySelectorAll('.profile-sess-group').forEach(g => {
             const visible = g.querySelectorAll('tr.vote-row:not([style*="display: none"])').length;
             g.style.display = visible ? '' : 'none';
@@ -1343,6 +1510,249 @@ function renderSessionsTable() {
       <td>${speakers > 0 ? speakers : '—'}</td>
     </tr>`;
   }).join('');
+}
+
+// ── Interpelacje ──
+const INTERP_PER_PAGE = 30;
+let interpPage = 0;
+let interpSearch = '';
+let interpTypFilter = 'all';
+let interpCatFilter = 'all';
+let interpRadnyFilter = 'all';
+
+function interpCriToSlug(cri) { return (cri || '').replace(/\//g, '-'); }
+function interpSlugToCri(slug) { return (slug || '').replace(/-/g, '/'); }
+
+function renderInterpelacjeTable() {
+  const all = window.INTERPELACJE || [];
+  if (!all.length) {
+    document.getElementById('interpelacje-list').innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px">Brak danych o interpelacjach</div>';
+    return;
+  }
+
+  // Build radny dropdown
+  const radnySet = new Set();
+  all.forEach(i => { if (i.radny) radnySet.add(i.radny); });
+  const radniSorted = [...radnySet].sort((a, b) => a.localeCompare(b, 'pl'));
+  const radnySelect = document.getElementById('interpelacje-radny-filter');
+  if (radnySelect && radnySelect.options.length <= 1) {
+    radniSorted.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      radnySelect.appendChild(opt);
+    });
+  }
+
+  // Wire up search and filters
+  const searchInput = document.getElementById('interpelacje-search');
+  if (searchInput && !searchInput._wired) {
+    searchInput._wired = true;
+    let debounce;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        interpSearch = searchInput.value.toLowerCase();
+        interpPage = 0;
+        renderInterpelacjeTable();
+      }, 300);
+    });
+  }
+  const typSelect = document.getElementById('interpelacje-typ-filter');
+  if (typSelect && !typSelect._wired) {
+    typSelect._wired = true;
+    typSelect.addEventListener('change', () => { interpTypFilter = typSelect.value; interpPage = 0; renderInterpelacjeTable(); });
+  }
+  if (radnySelect && !radnySelect._wired) {
+    radnySelect._wired = true;
+    radnySelect.addEventListener('change', () => { interpRadnyFilter = radnySelect.value; interpPage = 0; renderInterpelacjeTable(); });
+  }
+  const catSelect = document.getElementById('interpelacje-cat-filter');
+  if (catSelect && catSelect.options.length <= 1) {
+    const catOrder = Object.keys(INTERP_CATS).sort((a,b) => (INTERP_CATS[a]?.order||99) - (INTERP_CATS[b]?.order||99));
+    catOrder.forEach(cat => {
+      const cnt = all.filter(i => categorizeInterpelacja(i.przedmiot) === cat).length;
+      if (!cnt) return;
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = `${INTERP_CATS[cat].label} (${cnt})`;
+      catSelect.appendChild(opt);
+    });
+  }
+  if (catSelect && !catSelect._wired) {
+    catSelect._wired = true;
+    catSelect.addEventListener('change', () => { interpCatFilter = catSelect.value; interpPage = 0; renderInterpelacjeTable(); });
+  }
+
+  // Filter
+  let filtered = all;
+  if (interpTypFilter !== 'all') filtered = filtered.filter(i => i.typ === interpTypFilter);
+  if (interpCatFilter !== 'all') filtered = filtered.filter(i => categorizeInterpelacja(i.przedmiot) === interpCatFilter);
+  if (interpRadnyFilter !== 'all') filtered = filtered.filter(i => i.radny === interpRadnyFilter);
+  if (interpSearch) {
+    const q = interpSearch;
+    filtered = filtered.filter(i =>
+      (i.przedmiot || '').toLowerCase().includes(q) ||
+      (i.radny || '').toLowerCase().includes(q) ||
+      (i.cri || '').toLowerCase().includes(q)
+    );
+  }
+
+  // Stats
+  const totalInterp = all.filter(i => i.typ === 'interpelacja').length;
+  const totalZap = all.filter(i => i.typ === 'zapytanie').length;
+  const withAnswer = all.filter(i => i.data_odpowiedzi).length;
+
+  document.getElementById('interpelacje-stats').innerHTML = `
+    <div class="metric-card"><div class="metric-value">${all.length}</div><div class="metric-label">Razem</div></div>
+    <div class="metric-card"><div class="metric-value">${totalInterp}</div><div class="metric-label">Interpelacji</div></div>
+    <div class="metric-card"><div class="metric-value">${totalZap}</div><div class="metric-label">Zapytań</div></div>
+    <div class="metric-card"><div class="metric-value">${withAnswer}</div><div class="metric-label">Z odpowiedzią</div></div>
+  `;
+
+  // Paginate
+  const totalPages = Math.ceil(filtered.length / INTERP_PER_PAGE);
+  if (interpPage >= totalPages) interpPage = Math.max(0, totalPages - 1);
+  const pageItems = filtered.slice(interpPage * INTERP_PER_PAGE, (interpPage + 1) * INTERP_PER_PAGE);
+
+  let html = '';
+  let currentYear = null;
+  pageItems.forEach(item => {
+    const year = item.rok || (item.data_wplywu ? parseInt(item.data_wplywu.substring(0, 4)) : 0);
+    if (year !== currentYear) {
+      currentYear = year;
+      html += `<div style="font-weight:700;font-size:1.1rem;margin:16px 0 8px;color:var(--text)">${year}</div>`;
+    }
+
+    const typLabel = item.typ === 'zapytanie'
+      ? '<span style="background:rgba(37,99,235,0.12);color:var(--blue,#2563eb);padding:1px 6px;border-radius:3px;font-size:0.72rem;font-weight:600">ZAPYTANIE</span>'
+      : '<span style="background:rgba(79,70,229,0.12);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.72rem;font-weight:600">INTERPELACJA</span>';
+
+    const hasAnswer = item.data_odpowiedzi ? '<span style="color:var(--green,#16a34a);font-size:0.75rem" title="Jest odpowiedź">&#10003;</span>' : '<span style="color:var(--muted);font-size:0.75rem" title="Brak odpowiedzi">&#8987;</span>';
+
+    const cri = (item.cri || '').replace(/'/g, "\\'");
+
+    const radnyName = item.radny || '';
+    const prof = PROFILES && PROFILES.profiles.find(p => p.name === radnyName);
+    const radnyHtml = prof
+      ? `<a href="/profil/${prof.slug}" onclick="event.stopPropagation();event.preventDefault();showProfile('${radnyName.replace(/'/g, "\\'")}')" style="color:var(--accent)">${radnyName}</a>`
+      : (radnyName || '<span style="color:var(--muted)">brak autora</span>');
+
+    html += `<div style="padding:12px 16px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--surface);cursor:pointer" onclick="showInterpelacja('${cri}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-weight:600;font-size:0.85rem;color:var(--accent)">${item.cri || '?'}</span>
+            ${typLabel}
+            ${interpCatPill(categorizeInterpelacja(item.przedmiot))}
+            ${hasAnswer}
+          </div>
+          <div style="font-size:0.9rem;color:var(--text)">${item.przedmiot || '(brak tematu)'}</div>
+        </div>
+      </div>
+      <div style="margin-top:4px;font-size:0.8rem;color:var(--muted)">
+        ${radnyHtml} · ${item.data_wplywu || '?'}${item.data_odpowiedzi ? ' · odp. ' + item.data_odpowiedzi : ''}
+      </div>
+    </div>`;
+  });
+
+  if (!html) html = '<div style="color:var(--muted);text-align:center;padding:40px">Brak wyników</div>';
+  document.getElementById('interpelacje-list').innerHTML = html;
+
+  // Pager
+  let pHtml = `<span style="color:var(--muted);font-size:0.85rem">${filtered.length} wyników</span> `;
+  if (totalPages > 1) {
+    if (interpPage > 0) pHtml += `<button class="pager-btn" onclick="interpPage=${interpPage-1};renderInterpelacjeTable()">&#8249;</button>`;
+    for (let i = Math.max(0, interpPage-3); i < Math.min(totalPages, interpPage+4); i++) {
+      pHtml += `<button class="pager-btn ${i===interpPage?'active':''}" onclick="interpPage=${i};renderInterpelacjeTable()">${i+1}</button>`;
+    }
+    if (interpPage < totalPages - 1) pHtml += `<button class="pager-btn" onclick="interpPage=${interpPage+1};renderInterpelacjeTable()">&#8250;</button>`;
+  }
+  document.getElementById('interpelacje-pager').innerHTML = pHtml;
+}
+
+function showInterpelacja(cri) {
+  const all = window.INTERPELACJE || [];
+  const item = all.find(i => i.cri === cri);
+  if (!item) { showMain(); return; }
+
+  hideAllViews();
+  const view = document.getElementById('interpelacja-view');
+  view.style.display = 'block';
+  navigateTo('/interpelacja/' + interpCriToSlug(cri));
+  setTitle((item.typ === 'zapytanie' ? 'Zapytanie' : 'Interpelacja') + ' ' + cri);
+
+  const typLabel = item.typ === 'zapytanie' ? 'Zapytanie' : 'Interpelacja';
+  const typColor = item.typ === 'zapytanie' ? 'var(--blue,#2563eb)' : 'var(--accent)';
+
+  const radnyName = item.radny || '';
+  const prof = PROFILES && PROFILES.profiles.find(p => p.name === radnyName);
+  const radnyHtml = prof
+    ? `<a href="/profil/${prof.slug}" onclick="event.preventDefault();showProfile('${radnyName.replace(/'/g, "\\'")}')" style="color:var(--accent);font-weight:500">${radnyName}</a>`
+    : `<span style="font-weight:500">${radnyName || 'brak autora'}</span>`;
+
+  const radnyCount = radnyName ? all.filter(i => i.radny === radnyName).length : 0;
+
+  let html = `
+    <button onclick="showMain();activateTab('interpelacje')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.95rem;padding:8px 0;margin-bottom:12px">&#8592; Interpelacje</button>
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <span style="color:${typColor};font-weight:600;font-size:0.85rem;text-transform:uppercase">${typLabel}</span>
+        ${interpCatPill(categorizeInterpelacja(item.przedmiot))}
+        <span style="color:var(--muted);font-size:0.85rem">${item.cri || ''}</span>
+      </div>
+      <h2 style="font-size:1.3rem;font-weight:600;border:none;padding:0">${item.przedmiot || '(brak tematu)'}</h2>
+    </div>
+
+    <div class="profile-metrics" style="margin-bottom:24px">
+      <div class="metric-card" style="grid-column:1/-1">
+        <div class="metric-value" style="font-size:1.1rem">${radnyHtml}</div>
+        <div class="metric-label">Autor ${radnyCount ? '(' + radnyCount + ' interp.)' : ''}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" style="font-size:1.1rem">${item.data_wplywu || '?'}</div>
+        <div class="metric-label">Data wpływu</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" style="font-size:1.1rem;color:${item.data_odpowiedzi ? 'var(--green,#16a34a)' : 'var(--muted)'}">${item.data_odpowiedzi || 'brak'}</div>
+        <div class="metric-label">Data odpowiedzi</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">${item.kadencja || '?'}</div>
+        <div class="metric-label">Kadencja</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+      ${item.tresc_url ? `<a href="${item.tresc_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;font-weight:500">Treść interpelacji &#8599;</a>` : ''}
+      ${item.odpowiedz_url ? `<a href="${item.odpowiedz_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--green,#16a34a);color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;font-weight:500">Odpowiedź &#8599;</a>` : ''}
+    </div>
+
+    ${item.data_odpowiedzi && item.data_wplywu ? `<div style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Czas odpowiedzi: ${Math.round((new Date(item.data_odpowiedzi) - new Date(item.data_wplywu)) / (1000 * 60 * 60 * 24))} dni</div>` : ''}
+  `;
+
+  // Other interpelacje by same author
+  if (radnyName) {
+    const otherByRadny = all.filter(i => i.cri !== item.cri && i.radny === radnyName).slice(0, 10);
+    if (otherByRadny.length) {
+      html += `<div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:12px">Inne interpelacje: ${radnyName}</h3>`;
+      otherByRadny.forEach(o => {
+        const oCri = (o.cri || '').replace(/'/g, "\\'");
+        html += `<div style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer;background:var(--surface)" onclick="showInterpelacja('${oCri}')">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-weight:600;font-size:0.8rem;color:var(--accent)">${o.cri}</span>
+            <span style="font-size:0.75rem;color:var(--muted)">${o.data_wplywu}</span>
+          </div>
+          <div style="font-size:0.85rem">${o.przedmiot || ''}</div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+  }
+
+  view.innerHTML = html;
+  window.scrollTo(0, 0);
 }
 
 function renderVotesTable() {
