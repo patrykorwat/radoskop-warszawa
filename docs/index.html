@@ -402,6 +402,7 @@ header { min-height:80px; }
   <div id="app" style="display:none">
     <div class="stats-grid" id="stats-grid"></div>
     <div id="budget-overview" style="display:none"></div>
+    <div id="interpelacje-overview" style="display:none"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:20px">
       <div class="tab-bar" id="tab-bar" style="margin-bottom:0">
         <button class="tab active" data-tab="ranking">Ranking radnych</button>
@@ -855,12 +856,19 @@ function render() {
 function renderStats() {
   const grid = document.getElementById('stats-grid');
   const clubs = [...new Set(K.councilors.map(c=>c.club))].filter(c=>c!=='?');
+  const IP = window.INTERPELACJE || [];
+  const ipTotal = IP.length;
+  const ipAnswered = IP.filter(i => interpHasAnswer(i)).length;
   const cards = [
     { label: 'Sesje', value: K.total_sessions },
     { label: 'Głosowania', value: K.total_votes },
     { label: 'Radnych', value: K.total_councilors },
     { label: 'Kluby', value: clubs.length },
   ];
+  if (ipTotal > 0) {
+    cards.push({ label: 'Interpelacji', value: ipTotal, clickTab: 'interpelacje' });
+    cards.push({ label: 'Z odpowiedzią', value: ipAnswered, clickTab: 'interpelacje' });
+  }
   const B = window.BUDGET;
   if (B && B.totals && B.totals.length > 0) {
     const latest = B.totals[B.totals.length - 1];
@@ -929,6 +937,70 @@ function renderStats() {
     </div>
   </div>`;
   overview.innerHTML = html;
+
+  // Interpelacje overview
+  const ipOverview = document.getElementById('interpelacje-overview');
+  if (!IP || IP.length === 0) { ipOverview.style.display = 'none'; return; }
+  ipOverview.style.display = '';
+
+  const ipInterp = IP.filter(i => i.typ === 'interpelacja').length;
+  const ipZap = IP.filter(i => i.typ === 'zapytanie').length;
+  const ipPct = ipTotal > 0 ? (ipAnswered / ipTotal * 100).toFixed(0) : 0;
+
+  // Top radni wg liczby interpelacji
+  const ipByRadny = {};
+  IP.forEach(i => {
+    const name = flipName(i.radny) || '(nieznany)';
+    ipByRadny[name] = (ipByRadny[name] || 0) + 1;
+  });
+  const topRadni = Object.entries(ipByRadny).sort((a,b) => b[1] - a[1]).slice(0, 5);
+  const maxIp = topRadni.length > 0 ? topRadni[0][1] : 1;
+
+  // Ostatnie interpelacje
+  const recent = [...IP].sort((a,b) => (b.data_wplywu||'').localeCompare(a.data_wplywu||'')).slice(0, 3);
+
+  let ipHtml = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;cursor:pointer" onclick="document.querySelector('[data-tab=interpelacje]').click()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="font-size:1.1rem;font-weight:600;margin:0;border:none;padding:0">Interpelacje i zapytania</h2>
+      <span style="color:var(--accent);font-size:0.85rem">Więcej →</span>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase">Interpelacji</div>
+            <div style="font-size:1.3rem;font-weight:700;color:var(--accent)">${ipInterp}</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase">Zapytań</div>
+            <div style="font-size:1.3rem;font-weight:700">${ipZap}</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase">Z odpowiedzią</div>
+            <div style="font-size:1.3rem;font-weight:700;color:var(--green,#16a34a)">${ipAnswered} <span style="font-size:0.85rem;font-weight:400">(${ipPct}%)</span></div>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Ostatnie</div>
+        ${recent.map(r => `<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+          <span style="font-size:0.75rem;color:var(--accent);font-weight:600;min-width:40px">${r.cri||''}</span>
+          <span style="font-size:0.8rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.przedmiot||'(brak tematu)'}</span>
+          <span style="font-size:0.7rem;color:var(--muted)">${r.data_wplywu||''}</span>
+        </div>`).join('')}
+      </div>
+      <div style="flex:1;min-width:240px">
+        <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Najaktywniejszi radni</div>
+        ${topRadni.map(([name, count]) => {
+          const pct = (count / maxIp * 100).toFixed(1);
+          return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="font-size:0.8rem;width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name}</span>
+            <div style="flex:1;background:var(--border);border-radius:3px;height:6px;overflow:hidden"><div style="width:${pct}%;background:var(--accent);height:100%;border-radius:3px"></div></div>
+            <span style="font-size:0.75rem;color:var(--muted);width:30px;text-align:right">${count}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+  ipOverview.innerHTML = ipHtml;
 }
 
 function renderClubFilter() {
