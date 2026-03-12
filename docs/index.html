@@ -15,30 +15,82 @@
 <meta property="og:url" content="https://warszawa.radoskop.pl/">
 <meta property="og:locale" content="pl_PL">
 <meta property="og:site_name" content="Radoskop Warszawa">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://warszawa.radoskop.pl/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Radoskop Warszawa — Monitoring głosowań Rady m.st. Warszawy">
 <meta name="twitter:description" content="Otwarte narzędzie monitoringu Rady Miasta Warszawy. Frekwencja, głosowania i aktywność radnych.">
+<meta name="twitter:image" content="https://warszawa.radoskop.pl/og-image.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Radoskop Warszawa",
-  "description": "Otwarte narzędzie monitoringu Rady Miasta Warszawy. Sprawdź frekwencję, głosowania i aktywność radnych na sesjach.",
-  "url": "https://warszawa.radoskop.pl/",
-  "applicationCategory": "GovernmentApplication",
-  "operatingSystem": "Web",
-  "author": {
-    "@type": "Person",
-    "name": "Patryk Orwat"
-  },
-  "about": {
-    "@type": "GovernmentOrganization",
-    "name": "Rada Miasta Warszawy",
-    "url": "https://bip.warszawa.pl/sesje-rady-m.st.-warszawy"
-  },
-  "license": "https://www.gnu.org/licenses/agpl-3.0.html",
-  "isAccessibleForFree": true,
-  "inLanguage": "pl"
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "Radoskop Warszawa",
+      "description": "Radoskop — otwarte narzędzie monitoringu Rady Miasta Stołecznego Warszawy. Sprawdź frekwencję, głosowania i aktywność radnych na sesjach.",
+      "url": "https://warszawa.radoskop.pl/",
+      "applicationCategory": "GovernmentApplication",
+      "operatingSystem": "Web",
+      "author": {
+        "@type": "Person",
+        "name": "Patryk Orwat",
+        "url": "https://radoskop.pl/"
+      },
+      "about": {
+        "@type": "GovernmentOrganization",
+        "name": "Rada Miasta Warszawy",
+        "url": "https://bip.warszawa.pl/sesje-rady-m.st.-warszawy"
+      },
+      "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+      "isAccessibleForFree": true,
+      "inLanguage": "pl",
+      "image": "https://warszawa.radoskop.pl/og-image.png"
+    },
+    {
+      "@type": "WebSite",
+      "name": "Radoskop Warszawa",
+      "url": "https://warszawa.radoskop.pl/",
+      "inLanguage": "pl",
+      "publisher": {
+        "@type": "Person",
+        "name": "Patryk Orwat"
+      }
+    },
+    {
+      "@type": "Dataset",
+      "name": "Dane glosowan Rady Miasta Warszawy",
+      "description": "Otwarte dane o glosowaniach, frekwencji i aktywnosci radnych Rady Miasta Warszawy.",
+      "url": "https://warszawa.radoskop.pl/",
+      "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+      "creator": {
+        "@type": "Person",
+        "name": "Patryk Orwat"
+      },
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "application/json",
+          "contentUrl": "https://warszawa.radoskop.pl/data.json"
+        }
+      ],
+      "temporalCoverage": "2024-2029",
+      "spatialCoverage": {
+        "@type": "Place",
+        "name": "Warszawa",
+        "containedInPlace": {
+          "@type": "Country",
+          "name": "Polska"
+        }
+      },
+      "variableMeasured": [
+        "Frekwencja radnych",
+        "Wyniki glosowan imiennych",
+        "Aktywnosc na sesjach"
+      ]
+    }
+  ]
 }
 </script>
 <!-- No analytics configured -->
