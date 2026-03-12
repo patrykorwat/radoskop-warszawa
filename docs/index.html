@@ -628,6 +628,11 @@ function namesMatch(bipName, profileName) {
   const fa = flipName(bipName).trim().toLowerCase();
   return fa === b;
 }
+function interpHasAnswer(item) {
+  if (item.data_odpowiedzi) return true;
+  const s = (item.odpowiedz_status || '').toLowerCase();
+  return s.includes('udzielono') && !s.includes('nie ');
+}
 function categorizeInterpelacja(przedmiot) {
   if (!przedmiot) return 'inne';
   const s = przedmiot.toLowerCase();
@@ -1302,7 +1307,7 @@ function showProfile(name) {
             ${interpCatPill(cat)}
             <span style="font-weight:600;font-size:0.8rem;color:var(--accent)">${item.cri}</span>
             <span style="font-size:0.75rem;color:var(--muted)">${item.data_wplywu}</span>
-            ${item.data_odpowiedzi ? '<span style="color:var(--green,#16a34a);font-size:0.7rem">&#10003;</span>' : ''}
+            ${interpHasAnswer(item) ? '<span style="color:var(--green,#16a34a);font-size:0.7rem">&#10003;</span>' : ''}
           </div>
           <div style="font-size:0.85rem">${item.przedmiot || ''}</div>
         </div>`;
@@ -1624,7 +1629,7 @@ function renderInterpelacjeTable() {
   // Stats
   const totalInterp = all.filter(i => i.typ === 'interpelacja').length;
   const totalZap = all.filter(i => i.typ === 'zapytanie').length;
-  const withAnswer = all.filter(i => i.data_odpowiedzi).length;
+  const withAnswer = all.filter(i => interpHasAnswer(i)).length;
 
   document.getElementById('interpelacje-stats').innerHTML = `
     <div class="metric-card"><div class="metric-value">${all.length}</div><div class="metric-label">Razem</div></div>
@@ -1651,7 +1656,7 @@ function renderInterpelacjeTable() {
       ? '<span style="background:rgba(37,99,235,0.12);color:var(--blue,#2563eb);padding:1px 6px;border-radius:3px;font-size:0.72rem;font-weight:600">ZAPYTANIE</span>'
       : '<span style="background:rgba(79,70,229,0.12);color:var(--accent);padding:1px 6px;border-radius:3px;font-size:0.72rem;font-weight:600">INTERPELACJA</span>';
 
-    const hasAnswer = item.data_odpowiedzi ? '<span style="color:var(--green,#16a34a);font-size:0.75rem" title="Jest odpowiedź">&#10003;</span>' : '<span style="color:var(--muted);font-size:0.75rem" title="Brak odpowiedzi">&#8987;</span>';
+    const hasAnswer = interpHasAnswer(item) ? '<span style="color:var(--green,#16a34a);font-size:0.75rem" title="Jest odpowiedź">&#10003;</span>' : '<span style="color:var(--muted);font-size:0.75rem" title="Brak odpowiedzi">&#8987;</span>';
 
     const cri = (item.cri || '').replace(/'/g, "\\'");
 
@@ -1667,6 +1672,7 @@ function renderInterpelacjeTable() {
         <div style="flex:1">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
             <span style="font-weight:600;font-size:0.85rem;color:var(--accent)">${item.cri || '?'}</span>
+            ${item.bip_url ? `<a href="${item.bip_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Otwórz w BIP" style="color:var(--muted);font-size:0.7rem;text-decoration:none">&#8599;</a>` : ''}
             ${typLabel}
             ${interpCatPill(categorizeInterpelacja(item.przedmiot))}
             ${hasAnswer}
@@ -1675,7 +1681,7 @@ function renderInterpelacjeTable() {
         </div>
       </div>
       <div style="margin-top:4px;font-size:0.8rem;color:var(--muted)">
-        ${radnyHtml} · ${item.data_wplywu || '?'}${item.data_odpowiedzi ? ' · odp. ' + item.data_odpowiedzi : ''}
+        ${radnyHtml} · ${item.data_wplywu || '?'}${item.data_odpowiedzi ? ' · odp. ' + item.data_odpowiedzi : (interpHasAnswer(item) ? ' · <span style="color:var(--green,#16a34a)">odp. udzielona</span>' : '')}
       </div>
     </div>`;
   });
@@ -1739,8 +1745,8 @@ function showInterpelacja(cri) {
         <div class="metric-label">Data wpływu</div>
       </div>
       <div class="metric-card">
-        <div class="metric-value" style="font-size:1.1rem;color:${item.data_odpowiedzi ? 'var(--green,#16a34a)' : 'var(--muted)'}">${item.data_odpowiedzi || 'brak'}</div>
-        <div class="metric-label">Data odpowiedzi</div>
+        <div class="metric-value" style="font-size:1.1rem;color:${interpHasAnswer(item) ? 'var(--green,#16a34a)' : 'var(--muted)'}">${item.data_odpowiedzi || (interpHasAnswer(item) ? 'udzielono' : 'brak')}</div>
+        <div class="metric-label">Odpowiedź</div>
       </div>
       <div class="metric-card">
         <div class="metric-value">${item.kadencja || '?'}</div>
@@ -1749,7 +1755,8 @@ function showInterpelacja(cri) {
     </div>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
-      ${item.tresc_url ? `<a href="${item.tresc_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;font-weight:500">Treść interpelacji &#8599;</a>` : ''}
+      ${item.bip_url ? `<a href="${item.bip_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;font-weight:500">Strona w BIP &#8599;</a>` : ''}
+      ${item.tresc_url ? `<a href="${item.tresc_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#6366f1;color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;font-weight:500">Treść interpelacji &#8599;</a>` : ''}
       ${item.odpowiedz_url ? `<a href="${item.odpowiedz_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--green,#16a34a);color:white;border-radius:8px;text-decoration:none;font-size:0.9rem;font-weight:500">Odpowiedź &#8599;</a>` : ''}
     </div>
 

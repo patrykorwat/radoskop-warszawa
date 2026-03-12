@@ -27,8 +27,11 @@ Szczegóły (PDF-y) wymagają oddzielnych requestów do stron detali.
 Użycie:
   python3 scrape_interpelacje.py [--output docs/interpelacje.json]
                                  [--kadencja 2024-2029]
-                                 [--fetch-details]
+                                 [--no-fetch-details]
                                  [--debug]
+
+Domyślnie pobiera szczegóły każdej interpelacji (PDF-y, data odpowiedzi).
+Użyj --no-fetch-details dla szybszego scrape bez detali.
 """
 
 import argparse
@@ -281,6 +284,11 @@ def parse_detail_page(html, debug=False):
         if "odpowied" in context or "odpowied" in section_title:
             if not result.get("odpowiedz_url"):
                 result["odpowiedz_url"] = href
+                # Próbuj wyciągnąć datę odpowiedzi z nazwy pliku: *_odp_DD_MM_YYYY_*
+                fname = href.rsplit("/", 1)[-1] if "/" in href else href
+                m = re.search(r"_odp_(\d{2})_(\d{2})_(\d{4})_", fname)
+                if m:
+                    result["data_odpowiedzi"] = f"{m.group(3)}-{m.group(2)}-{m.group(1)}"
         elif not tresc_found:
             result["tresc_url"] = href
             tresc_found = True
@@ -359,6 +367,10 @@ def scrape_kadencja(session, kad_id, kad_label, cat_id, fetch_details=False, deb
                     rec["tresc_url"] = detail["tresc_url"]
                 if detail.get("odpowiedz_url"):
                     rec["odpowiedz_url"] = detail["odpowiedz_url"]
+                if detail.get("data_odpowiedzi"):
+                    rec["data_odpowiedzi"] = detail["data_odpowiedzi"]
+                if detail.get("kadencja") and not rec.get("kadencja"):
+                    rec["kadencja"] = detail["kadencja"]
                 if detail.get("typ_detail"):
                     rec["typ"] = detail["typ_detail"]
                     # Popraw CRI jeśli typ się zmienił
@@ -416,9 +428,11 @@ def scrape(kadencje, output_path, fetch_details=False, debug=False):
         )
         all_records.extend(records)
 
-    # Usuń wewnętrzne pola
+    # Zamień detail_path na pełny URL BIP
     for r in all_records:
-        r.pop("detail_path", None)
+        dp = r.pop("detail_path", "")
+        if dp:
+            r["bip_url"] = f"https://bip.warszawa.pl{dp}" if dp.startswith("/") else dp
 
     # Sortuj od najnowszych
     all_records.sort(key=lambda x: x.get("data_wplywu", ""), reverse=True)
@@ -453,8 +467,8 @@ def main():
         help="Kadencja: '2024-2029', '2018-2023', ... lub 'all' (domyślnie: 2024-2029)"
     )
     parser.add_argument(
-        "--fetch-details", action="store_true",
-        help="Pobierz szczegóły każdej interpelacji (PDF-y, dokładny typ) — wolne!"
+        "--no-fetch-details", action="store_true",
+        help="Pomiń pobieranie szczegółów (szybszy scrape, ale bez PDF-ów i dat odpowiedzi)"
     )
     parser.add_argument(
         "--debug", action="store_true",
@@ -470,7 +484,7 @@ def main():
     scrape(
         kadencje=kadencje,
         output_path=args.output,
-        fetch_details=args.fetch_details,
+        fetch_details=not args.no_fetch_details,
         debug=args.debug,
     )
 
