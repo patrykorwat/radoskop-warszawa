@@ -193,7 +193,9 @@ def parse_listing_page(html, debug=False):
         numer = fields.get("numer", "")
         data = fields.get("data", "")
         przedmiot = fields.get("w sprawie", "")
-        radny = fields.get("radny/a", "")
+        radny_raw = fields.get("radny/a", "")
+        # Usuń oznaczenie klubu w nawiasie, np. "Mazurek Piotr (pis)" → "Mazurek Piotr"
+        radny = re.sub(r'\s*\([^)]*\)\s*$', '', radny_raw).strip()
         klub = fields.get("klub", "")
         odpowiedz_status = fields.get("odpowiedź", fields.get("odpowiedz", ""))
 

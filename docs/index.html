@@ -606,6 +606,28 @@ const INTERP_CAT_KWS = [
   ['spoleczne', ['pomoc','społeczn','niepełnospr','senior','bezdomn','opiek','zdrow','szpital','przychodni','terapeu']],
   ['porzadek', ['porządku','graffiti','dewastacj','wandali','nielegalne','dzikie','porzucon','wraki','reklam','kiosków','uporządkow','usunięci']],
 ];
+// BIP Warszawa: "Nazwisko Imię" → normalizacja do "Imię Nazwisko"
+function flipName(name) {
+  if (!name) return '';
+  // Usuń oznaczenie klubu w nawiasie, np. "(pis)", "(ko)"
+  const clean = name.trim().replace(/\s*\([^)]*\)\s*$/, '').trim();
+  const parts = clean.split(/\s+/);
+  if (parts.length < 2) return clean;
+  // Ostatnie słowo to imię, reszta to nazwisko
+  const imie = parts[parts.length - 1];
+  const nazwisko = parts.slice(0, -1).join(' ');
+  return imie + ' ' + nazwisko;
+}
+function namesMatch(bipName, profileName) {
+  if (!bipName || !profileName) return false;
+  // Usuń oznaczenie klubu w nawiasie przed porównaniem
+  const cleanBip = bipName.trim().replace(/\s*\([^)]*\)\s*$/, '').trim().toLowerCase();
+  const b = profileName.trim().toLowerCase();
+  if (cleanBip === b) return true;
+  // Porównaj flipnięte
+  const fa = flipName(bipName).trim().toLowerCase();
+  return fa === b;
+}
 function categorizeInterpelacja(przedmiot) {
   if (!przedmiot) return 'inne';
   const s = przedmiot.toLowerCase();
@@ -1214,7 +1236,7 @@ function showProfile(name) {
     }
 
     // ── Profile sub-tabs: Interpelacje / Głosowania ──
-    const interpAll = (window.INTERPELACJE || []).filter(i => i.radny === profile.name);
+    const interpAll = (window.INTERPELACJE || []).filter(i => namesMatch(i.radny, profile.name));
     const showInterpItems = interpAll;
     const hasInterp = showInterpItems.length > 0;
 
@@ -1530,16 +1552,16 @@ function renderInterpelacjeTable() {
     return;
   }
 
-  // Build radny dropdown
+  // Build radny dropdown (BIP: "Nazwisko Imię" → wyświetl "Imię Nazwisko")
   const radnySet = new Set();
   all.forEach(i => { if (i.radny) radnySet.add(i.radny); });
-  const radniSorted = [...radnySet].sort((a, b) => a.localeCompare(b, 'pl'));
+  const radniSorted = [...radnySet].sort((a, b) => flipName(a).localeCompare(flipName(b), 'pl'));
   const radnySelect = document.getElementById('interpelacje-radny-filter');
   if (radnySelect && radnySelect.options.length <= 1) {
     radniSorted.forEach(name => {
       const opt = document.createElement('option');
       opt.value = name;
-      opt.textContent = name;
+      opt.textContent = flipName(name);
       radnySelect.appendChild(opt);
     });
   }
@@ -1594,6 +1616,7 @@ function renderInterpelacjeTable() {
     filtered = filtered.filter(i =>
       (i.przedmiot || '').toLowerCase().includes(q) ||
       (i.radny || '').toLowerCase().includes(q) ||
+      flipName(i.radny || '').toLowerCase().includes(q) ||
       (i.cri || '').toLowerCase().includes(q)
     );
   }
@@ -1633,10 +1656,11 @@ function renderInterpelacjeTable() {
     const cri = (item.cri || '').replace(/'/g, "\\'");
 
     const radnyName = item.radny || '';
-    const prof = PROFILES && PROFILES.profiles.find(p => p.name === radnyName);
+    const radnyDisplay = flipName(radnyName);
+    const prof = PROFILES && PROFILES.profiles.find(p => namesMatch(radnyName, p.name));
     const radnyHtml = prof
-      ? `<a href="/profil/${prof.slug}" onclick="event.stopPropagation();event.preventDefault();showProfile('${radnyName.replace(/'/g, "\\'")}')" style="color:var(--accent)">${radnyName}</a>`
-      : (radnyName || '<span style="color:var(--muted)">brak autora</span>');
+      ? `<a href="/profil/${prof.slug}" onclick="event.stopPropagation();event.preventDefault();showProfile('${prof.name.replace(/'/g, "\\'")}')" style="color:var(--accent)">${radnyDisplay}</a>`
+      : (radnyDisplay || '<span style="color:var(--muted)">brak autora</span>');
 
     html += `<div style="padding:12px 16px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--surface);cursor:pointer" onclick="showInterpelacja('${cri}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
@@ -1686,10 +1710,11 @@ function showInterpelacja(cri) {
   const typColor = item.typ === 'zapytanie' ? 'var(--blue,#2563eb)' : 'var(--accent)';
 
   const radnyName = item.radny || '';
-  const prof = PROFILES && PROFILES.profiles.find(p => p.name === radnyName);
+  const radnyDisplay = flipName(radnyName);
+  const prof = PROFILES && PROFILES.profiles.find(p => namesMatch(radnyName, p.name));
   const radnyHtml = prof
-    ? `<a href="/profil/${prof.slug}" onclick="event.preventDefault();showProfile('${radnyName.replace(/'/g, "\\'")}')" style="color:var(--accent);font-weight:500">${radnyName}</a>`
-    : `<span style="font-weight:500">${radnyName || 'brak autora'}</span>`;
+    ? `<a href="/profil/${prof.slug}" onclick="event.preventDefault();showProfile('${prof.name.replace(/'/g, "\\'")}')" style="color:var(--accent);font-weight:500">${radnyDisplay}</a>`
+    : `<span style="font-weight:500">${radnyDisplay || 'brak autora'}</span>`;
 
   const radnyCount = radnyName ? all.filter(i => i.radny === radnyName).length : 0;
 
@@ -1736,7 +1761,7 @@ function showInterpelacja(cri) {
     const otherByRadny = all.filter(i => i.cri !== item.cri && i.radny === radnyName).slice(0, 10);
     if (otherByRadny.length) {
       html += `<div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px">
-        <h3 style="font-size:1rem;font-weight:600;margin-bottom:12px">Inne interpelacje: ${radnyName}</h3>`;
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:12px">Inne interpelacje: ${radnyDisplay}</h3>`;
       otherByRadny.forEach(o => {
         const oCri = (o.cri || '').replace(/'/g, "\\'");
         html += `<div style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer;background:var(--surface)" onclick="showInterpelacja('${oCri}')">
