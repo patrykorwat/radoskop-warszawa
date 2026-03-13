@@ -647,6 +647,15 @@ function interpCatPill(cat) {
   if (!c) return '';
   return `<span style="background:${c.color}18;color:${c.color};padding:1px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;white-space:nowrap">${c.label}</span>`;
 }
+function radnyLink(name) {
+  if (!name) return '?';
+  const names = name.includes(',') ? name.split(',').map(n => n.trim()).filter(Boolean) : [name.trim()];
+  return names.map(n => {
+    const p = PROFILES && PROFILES.profiles && PROFILES.profiles.find(pr => pr.name === n);
+    if (p) return '<a class="name-link" href="/profil/'+p.slug+'" onclick="event.preventDefault();showProfile(\''+n.replace(/'/g,"\\'")+'\')" style="color:var(--accent)">'+n+'</a>';
+    return n;
+  }).join(', ');
+}
 
 // Sort names by last name, then first name
 function sortByLastName(names) {
@@ -1313,7 +1322,11 @@ function showProfile(name) {
     }
 
     // ── Profile sub-tabs: Interpelacje / Głosowania ──
-    const interpAll = (window.INTERPELACJE || []).filter(i => namesMatch(i.radny, profile.name));
+    const interpAll = (window.INTERPELACJE || []).filter(i => {
+      const r = (i.radny || '').toLowerCase();
+      const pn = profile.name.toLowerCase();
+      return r === pn || r.includes(pn);
+    });
     const showInterpItems = interpAll;
     const hasInterp = showInterpItems.length > 0;
 
@@ -1732,12 +1745,7 @@ function renderInterpelacjeTable() {
 
     const cri = (item.cri || '').replace(/'/g, "\\'");
 
-    const radnyName = item.radny || '';
-    const radnyDisplay = flipName(radnyName);
-    const prof = PROFILES && PROFILES.profiles.find(p => namesMatch(radnyName, p.name));
-    const radnyHtml = prof
-      ? `<a href="/profil/${prof.slug}" onclick="event.stopPropagation();event.preventDefault();showProfile('${prof.name.replace(/'/g, "\\'")}')" style="color:var(--accent)">${radnyDisplay}</a>`
-      : (radnyDisplay || '<span style="color:var(--muted)">brak autora</span>');
+    const radnyHtml = radnyLink(item.radny) || '<span style="color:var(--muted)">brak autora</span>';
 
     html += `<div style="padding:12px 16px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--surface);cursor:pointer" onclick="showInterpelacja('${cri}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
@@ -1787,14 +1795,9 @@ function showInterpelacja(cri) {
   const typLabel = item.typ === 'zapytanie' ? 'Zapytanie' : 'Interpelacja';
   const typColor = item.typ === 'zapytanie' ? 'var(--blue,#2563eb)' : 'var(--accent)';
 
-  const radnyName = item.radny || '';
-  const radnyDisplay = flipName(radnyName);
-  const prof = PROFILES && PROFILES.profiles.find(p => namesMatch(radnyName, p.name));
-  const radnyHtml = prof
-    ? `<a href="/profil/${prof.slug}" onclick="event.preventDefault();showProfile('${prof.name.replace(/'/g, "\\'")}')" style="color:var(--accent);font-weight:500">${radnyDisplay}</a>`
-    : `<span style="font-weight:500">${radnyDisplay || 'brak autora'}</span>`;
+  const radnyHtml = radnyLink(item.radny);
 
-  const radnyCount = radnyName ? all.filter(i => i.radny === radnyName).length : 0;
+  const radnyCount = item.radny ? all.filter(i => i.radny === item.radny).length : 0;
 
   let html = `
     <button onclick="showMain();activateTab('interpelacje')" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.95rem;padding:8px 0;margin-bottom:12px">&#8592; Interpelacje</button>
